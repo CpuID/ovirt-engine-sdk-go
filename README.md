@@ -1,0 +1,63 @@
+= oVirt Go SDK
+
+== Introduction
+
+The oVirt Go SDK is a Go package that simplyfies access to the oVirt
+Engine API.
+
+IMPORTANT: This document describes how to generate, build and test the
+SDK. If you are interested in how to use it read the `README.adoc` file
+in the `sdk` directory instead.
+
+== Building
+
+The SDK uses http://www.xmlsoft.org[libxml2] for parsing and rendering
+XML documents, and the part that interacts with this library is written
+in C. This means that before building you must make sure you have the C
+compiler and the required header and libraries files installed in your
+system. For example to install with the `yum` package manager you will
+need to do the following:
+
+  # yum -y install \
+  gcc \
+  libxml2-devel
+
+Most of the source code of the Go SDK is automatically generated from
+the API model.
+
+The code generator is a Java program that resides in the `generator`
+directory.  This Java program will get the API model and the metamodel
+artifacts from the available Maven repositories. To build and run it use
+the following commands:
+
+  $ git clone https://github.com/CpuID/ovirt-engine-sdk-go.git
+  $ cd ovirt-engine-sdk-go
+  $ mvn package
+
+This will build the code generator, and run it to generate the SDK for the
+version of the API that corresponds to the branch of the SDK that you
+are using.
+
+If you need to generate it for a different version of the API then you
+can use the `model.version` property. For example, if you need to
+generate the SDK for version `4.1.0` of the SDK you can use this
+command:
+
+  $ mvn package -Dmodel.version=4.1.0
+
+Output will reside in the directory [sdk](https://github.com/CpuID/ovirt-engine-sdk-go/tree/master/sdk), and can be used
+in any Go application with an `import`:
+
+```
+import (
+  "github.com/CpuID/ovirt-engine-sdk-go/sdk"
+)
+```
+
+== Testing
+
+The test suite of the project is inside the `sdk` directory. To run
+the tests change into the `sdk` directory and execute:
+
+  $ cd sdk
+  $ go test
