@@ -32,7 +32,7 @@ limitations under the License.
   <artifactId>go-sdk</artifactId>
   <packaging>pom</packaging>
 
-  <name>oVirt Go SDK Gem</name>
+  <name>oVirt Go SDK Package</name>
 
   <properties>
 
