@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2016 Red Hat, Inc.
+Copyright (c) 2015-2016 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -41,12 +41,12 @@ public class Tool {
     private static final String OUT_OPTION = "out";
     private static final String VERSION_OPTION = "version";
 
-    // Reference to the objects used to calculate Ruby names:
-    @Inject private RubyNames rubyNames;
+    // Reference to the objects used to calculate Go names:
+    @Inject private GoNames goNames;
 
     // References to the generators:
     @Inject @Any
-    private Instance<RubyGenerator> generators;
+    private Instance<GoGenerator> generators;
 
     // Reference to the object used to add built-in types to the model:
     @Inject private BuiltinTypes builtinTypes;
@@ -66,25 +66,14 @@ public class Tool {
             .build()
         );
 
-        // Options for the location of the generated Ruby sources:
+        // Options for the location of the generated Go sources:
         options.addOption(Option.builder()
             .longOpt(OUT_OPTION)
-            .desc("The directory where the generated Ruby source will be created.")
+            .desc("The directory where the generated Go source will be created.")
             .type(File.class)
             .required(false)
             .hasArg(true)
             .argName("DIRECTORY")
-            .build()
-        );
-
-        // Option to specify the version number of the gem:
-        options.addOption(Option.builder()
-            .longOpt(VERSION_OPTION)
-            .desc("The the version number of the SDK, for example \"4.0.0.Alpha0\".")
-            .type(File.class)
-            .required(true)
-            .hasArg(true)
-            .argName("VERSION")
             .build()
         );
 
@@ -97,7 +86,7 @@ public class Tool {
         catch (ParseException exception) {
             HelpFormatter formatter = new HelpFormatter();
             formatter.setSyntaxPrefix("Usage: ");
-            formatter.printHelp("ruby-tool [OPTIONS]", options);
+            formatter.printHelp("go-tool [OPTIONS]", options);
             System.exit(1);
         }
 
@@ -108,12 +97,6 @@ public class Tool {
         // Extract the version of the:
         String version = line.getOptionValue(VERSION_OPTION);
 
-        // The version will usually come from the root POM of the project, where it will use upper case for suffixes
-        // like "Alpha" or "Beta". In addition it will have the "-SNAPSHOT" suffix for non release versions. We need
-        // to remove the "-SNAPSHOT" suffix, and convert the result to lower case, as the common practice for Ruby
-        // is to use "alpha" or "beta", lower case.
-        version = version.replaceAll("-SNAPSHOT$", "").toLowerCase();
-
         // Analyze the model files:
         Model model = new Model();
         ModelAnalyzer modelAnalyzer = new ModelAnalyzer();
@@ -123,13 +106,10 @@ public class Tool {
         // Add the built-in types:
         builtinTypes.addBuiltinTypes(model);
 
-        // Configure the object used to generate names:
-        rubyNames.setVersion(version);
-
         // Run the generators:
         if (outDir != null) {
             FileUtils.forceMkdir(outDir);
-            for (RubyGenerator generator : generators) {
+            for (GoGenerator generator : generators) {
                 generator.setOut(outDir);
                 generator.generate(model);
             }

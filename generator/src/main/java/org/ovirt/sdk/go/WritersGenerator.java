@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2016 Red Hat, Inc.
+Copyright (c) 2015-2016 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,17 +35,17 @@ import org.ovirt.api.metamodel.tool.SchemaNames;
  * This class is responsible for generating the classes that take instances of model types and generate the
  * corresponding XML documents.
  */
-public class WritersGenerator implements RubyGenerator {
+public class WritersGenerator implements GoGenerator {
     // The directory were the output will be generated:
     protected File out;
 
     // Reference to the objects used to generate the code:
     @Inject private Names names;
     @Inject private SchemaNames schemaNames;
-    @Inject private RubyNames rubyNames;
+    @Inject private GoNames goNames;
 
-    // The buffer used to generate the Ruby code:
-    private RubyBuffer buffer;
+    // The buffer used to generate the Go code:
+    private GoBuffer buffer;
 
     public void setOut(File newOut) {
         out = newOut;
@@ -53,8 +53,8 @@ public class WritersGenerator implements RubyGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = rubyNames.getModulePath() + "/writers";
-        buffer = new RubyBuffer();
+        String fileName = goNames.getModulePath() + "/writers";
+        buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
         // Generate the source:
@@ -71,7 +71,7 @@ public class WritersGenerator implements RubyGenerator {
 
     private void generateSource(Model model) {
         // Begin module:
-        String moduleName = rubyNames.getModuleName();
+        String moduleName = goNames.getModuleName();
         buffer.beginModule(moduleName);
         buffer.addLine();
 
@@ -88,8 +88,8 @@ public class WritersGenerator implements RubyGenerator {
 
     private void generateWriter(StructType type) {
         // Begin class:
-        RubyName writerName = rubyNames.getWriterName(type);
-        RubyName baseName = rubyNames.getBaseWriterName();
+        GoName writerName = goNames.getWriterName(type);
+        GoName baseName = goNames.getBaseWriterName();
         buffer.addLine("class %1$s < %2$s # :nodoc:", writerName.getClassName(), baseName.getClassName());
         buffer.addLine();
 
@@ -113,7 +113,7 @@ public class WritersGenerator implements RubyGenerator {
         buffer.addLine(  "singular ||= '%1$s'", singularName);
         buffer.addLine(  "plural ||= '%1$s'", pluralName);
         buffer.addLine(  "writer.write_start(plural)", pluralName);
-        buffer.addLine(  "if list.is_a?(%1$s)", rubyNames.getBaseListName().getClassName());
+        buffer.addLine(  "if list.is_a?(%1$s)", goNames.getBaseListName().getClassName());
         buffer.addLine(    "href = list.href");
         buffer.addLine(    "writer.write_attribute('href', href) unless href.nil?");
         buffer.addLine(  "end");
@@ -154,7 +154,7 @@ public class WritersGenerator implements RubyGenerator {
     private void generateMemberWriteAsAttribute(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = rubyNames.getMemberStyleName(name);
+        String property = goNames.getMemberStyleName(name);
         String attribute = schemaNames.getSchemaTagName(name);
         if (type instanceof PrimitiveType) {
             generateWritePrimitivePropertyAsAttribute((PrimitiveType) type, attribute, "object." + property);
@@ -184,7 +184,7 @@ public class WritersGenerator implements RubyGenerator {
     private void generateMemberWriteAsElement(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = rubyNames.getMemberStyleName(name);
+        String property = goNames.getMemberStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
         if (type instanceof PrimitiveType) {
             generateWritePrimitivePropertyAsElement((PrimitiveType) type, tag, "object." + property);
@@ -226,9 +226,9 @@ public class WritersGenerator implements RubyGenerator {
     private void generateWriteStructPropertyAsElement(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = rubyNames.getMemberStyleName(name);
+        String property = goNames.getMemberStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
-        RubyName writerName = rubyNames.getWriterName(type);
+        GoName writerName = goNames.getWriterName(type);
         buffer.addLine(
             "%1$s.write_one(object.%2$s, writer, '%3$s') unless object.%2$s.nil?",
             writerName.getClassName(),
@@ -242,7 +242,7 @@ public class WritersGenerator implements RubyGenerator {
         Type type = member.getType();
         ListType listType = (ListType) type;
         Type elementType = listType.getElementType();
-        String property = rubyNames.getMemberStyleName(name);
+        String property = goNames.getMemberStyleName(name);
         String pluralTag = schemaNames.getSchemaTagName(name);
         String singularTag = schemaNames.getSchemaTagName(names.getSingular(name));
         if (elementType instanceof PrimitiveType || elementType instanceof EnumType) {
@@ -260,7 +260,7 @@ public class WritersGenerator implements RubyGenerator {
             buffer.addLine("end");
         }
         else if (elementType instanceof StructType) {
-            RubyName elementWriterName = rubyNames.getWriterName(elementType);
+            GoName elementWriterName = goNames.getWriterName(elementType);
             buffer.addLine(
                 "%1$s.write_many(object.%2$s, writer, '%3$s', '%4$s') unless object.%2$s.nil?",
                 elementWriterName.getClassName(),

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2016 Red Hat, Inc.
+Copyright (c) 2015-2016 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ import org.ovirt.api.metamodel.tool.SchemaNames;
 /**
  * This class is responsible for generating the classes that represent the services of the model.
  */
-public class ServicesGenerator implements RubyGenerator {
+public class ServicesGenerator implements GoGenerator {
     // Well known method names:
     private static final Name ADD = NameParser.parseUsingCase("Add");
     private static final Name GET = NameParser.parseUsingCase("Get");
@@ -56,12 +56,11 @@ public class ServicesGenerator implements RubyGenerator {
     protected File out;
 
     // Reference to the objects used to generate the code:
-    @Inject private RubyNames rubyNames;
+    @Inject private GoNames goNames;
     @Inject private SchemaNames schemaNames;
-    @Inject private YardDoc yardDoc;
 
-    // The buffer used to generate the Ruby code:
-    private RubyBuffer buffer;
+    // The buffer used to generate the Go code:
+    private GoBuffer buffer;
 
     /**
      * Set the directory were the output will be generated.
@@ -72,8 +71,8 @@ public class ServicesGenerator implements RubyGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = rubyNames.getModulePath() + "/services";
-        buffer = new RubyBuffer();
+        String fileName = goNames.getModulePath() + "/services";
+        buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
         // Generate the source:
@@ -93,7 +92,7 @@ public class ServicesGenerator implements RubyGenerator {
         buffer.addComment();
         buffer.addComment("These forward declarations are required in order to avoid circular dependencies.");
         buffer.addComment();
-        String moduleName = rubyNames.getModuleName();
+        String moduleName = goNames.getModuleName();
         buffer.beginModule(moduleName);
         buffer.addLine();
 
@@ -195,7 +194,7 @@ public class ServicesGenerator implements RubyGenerator {
         Name methodName = method.getName();
         Type parameterType = parameter.getType();
         Name parameterName = parameter.getName();
-        String arg = rubyNames.getMemberStyleName(parameterName);
+        String arg = goNames.getMemberStyleName(parameterName);
         String doc = method.getDoc();
         if (doc == null) {
             doc = String.format("Adds a new `%1$s`.", arg);
@@ -203,11 +202,7 @@ public class ServicesGenerator implements RubyGenerator {
         buffer.addComment();
         buffer.addComment(doc);
         buffer.addComment();
-        buffer.addComment("@param %1$s [%2$s]", arg, yardDoc.getType(parameterType));
-        buffer.addComment();
-        buffer.addComment("@return [%1$s]", yardDoc.getType(parameterType));
-        buffer.addComment();
-        buffer.addLine("def %1$s(%2$s, opts = {})", rubyNames.getMemberStyleName(methodName), arg);
+        buffer.addLine("def %1$s(%2$s, opts = {})", goNames.getMemberStyleName(methodName), arg);
 
         // Body:
         generateConvertLiteral(parameterType, arg);
@@ -229,7 +224,7 @@ public class ServicesGenerator implements RubyGenerator {
     private void generateActionHttpPost(Method method) {
         // Begin method:
         Name methodName = method.getName();
-        String actionName = rubyNames.getMemberStyleName(methodName);
+        String actionName = goNames.getMemberStyleName(methodName);
         String doc = method.getDoc();
         if (doc == null) {
             doc = String.format("Executes the `%1$s` method.", actionName);
@@ -268,7 +263,7 @@ public class ServicesGenerator implements RubyGenerator {
     }
 
     private void generateActionResponse(Parameter parameter) {
-        buffer.addLine("return action.%1$s", rubyNames.getMemberStyleName(parameter.getName()));
+        buffer.addLine("return action.%1$s", goNames.getMemberStyleName(parameter.getName()));
     }
 
     private void generateHttpGet(Method method) {
@@ -294,19 +289,8 @@ public class ServicesGenerator implements RubyGenerator {
             doc = "Returns the representation of the object managed by this service.";
         }
         buffer.addComment(doc);
-        buffer.addComment();
-        buffer.addComment("@param opts [Hash] Additional options.");
-        buffer.addComment();
-        if (!inParameters.isEmpty()) {
-            inParameters.forEach(parameter -> {
-                generateParameterDocumentation(parameter);
-                buffer.addComment();
-            });
-        }
-        buffer.addComment("@return [%1$s]", yardDoc.getType(mainParameter.getType()));
-        buffer.addComment();
         Name methodName = method.getName();
-        buffer.addLine("def %1$s(opts = {})", rubyNames.getMemberStyleName(methodName));
+        buffer.addLine("def %1$s(opts = {})", goNames.getMemberStyleName(methodName));
 
         // Generate the input parameters:
         buffer.addLine("query = {}");
@@ -338,7 +322,7 @@ public class ServicesGenerator implements RubyGenerator {
         Name methodName = method.getName();
         Name parameterName = parameter.getName();
         Type parameterType = parameter.getType();
-        String arg = rubyNames.getMemberStyleName(parameterName);
+        String arg = goNames.getMemberStyleName(parameterName);
         String doc = method.getDoc();
         if (doc == null) {
             doc = "Updates the object managed by this service.";
@@ -346,7 +330,7 @@ public class ServicesGenerator implements RubyGenerator {
         buffer.addComment();
         buffer.addComment(doc);
         buffer.addComment();
-        buffer.addLine("def %1$s(%2$s)", rubyNames.getMemberStyleName(methodName), arg);
+        buffer.addLine("def %1$s(%2$s)", goNames.getMemberStyleName(methodName), arg);
 
         // Body:
         generateConvertLiteral(parameterType, arg);
@@ -369,7 +353,7 @@ public class ServicesGenerator implements RubyGenerator {
     private void generateConvertLiteral(Type type, String variable) {
         if (type instanceof StructType) {
             buffer.addLine("if %1$s.is_a?(Hash)", variable);
-            buffer.addLine(  "%1$s = %2$s.new(%1$s)", variable, rubyNames.getTypeName(type));
+            buffer.addLine(  "%1$s = %2$s.new(%1$s)", variable, goNames.getTypeName(type));
             buffer.addLine("end");
         }
         else if (type instanceof ListType) {
@@ -379,7 +363,7 @@ public class ServicesGenerator implements RubyGenerator {
             buffer.addLine(  "%1$s = List.new(%1$s)", variable);
             buffer.addLine(  "%1$s.each_with_index do |value, index|", variable);
             buffer.addLine(    "if value.is_a?(Hash)");
-            buffer.addLine(      "%1$s[index] = %2$s.new(value)", variable, rubyNames.getTypeName(elementType));
+            buffer.addLine(      "%1$s[index] = %2$s.new(value)", variable, goNames.getTypeName(elementType));
             buffer.addLine(    "end");
             buffer.addLine(  "end");
             buffer.addLine("end");
@@ -391,13 +375,13 @@ public class ServicesGenerator implements RubyGenerator {
         buffer.addLine("begin");
         buffer.addLine(  "writer = XmlWriter.new(nil, true)");
         if (type instanceof StructType) {
-            RubyName writer = rubyNames.getWriterName(type);
+            GoName writer = goNames.getWriterName(type);
             buffer.addLine("%1$s.write_one(%2$s, writer)", writer.getClassName(), variable);
         }
         else if (type instanceof ListType) {
             ListType listType = (ListType) type;
             Type elementType = listType.getElementType();
-            RubyName writer = rubyNames.getWriterName(elementType);
+            GoName writer = goNames.getWriterName(elementType);
             buffer.addLine("%1$s.write_many(%2$s, writer)", writer.getClassName(), variable);
         }
         buffer.addLine(  "request.body = writer.string");
@@ -411,13 +395,13 @@ public class ServicesGenerator implements RubyGenerator {
         buffer.addLine("begin");
         buffer.addLine(  "reader = XmlReader.new(response.body)");
         if (type instanceof StructType) {
-            RubyName reader = rubyNames.getReaderName(type);
+            GoName reader = goNames.getReaderName(type);
             buffer.addLine("return %1$s.read_one(reader)", reader.getClassName());
         }
         else if (type instanceof ListType) {
             ListType listType = (ListType) type;
             Type elementType = listType.getElementType();
-            RubyName reader = rubyNames.getReaderName(elementType);
+            GoName reader = goNames.getReaderName(elementType);
             buffer.addLine("return %1$s.read_many(reader)", reader.getClassName());
         }
         buffer.addLine("ensure");
@@ -442,14 +426,7 @@ public class ServicesGenerator implements RubyGenerator {
         buffer.addComment(doc);
         buffer.addComment();
         buffer.addComment("@param opts [Hash] Additional options.");
-        buffer.addComment();
-        if (!inParameters.isEmpty()) {
-            inParameters.forEach(parameter -> {
-                generateParameterDocumentation(parameter);
-                buffer.addComment();
-            });
-        }
-        buffer.addLine("def %1$s(opts = {})", rubyNames.getMemberStyleName(name));
+        buffer.addLine("def %1$s(opts = {})", goNames.getMemberStyleName(name));
 
         // Generate the input parameters:
         buffer.addLine("query = {}");
@@ -468,7 +445,7 @@ public class ServicesGenerator implements RubyGenerator {
     private void generateUrlParameter(Parameter parameter) {
         Type type = parameter.getType();
         Name name = parameter.getName();
-        String symbol = rubyNames.getMemberStyleName(name);
+        String symbol = goNames.getMemberStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
         buffer.addLine("value = opts[:%1$s]", symbol);
         buffer.addLine("unless value.nil?");
@@ -491,34 +468,8 @@ public class ServicesGenerator implements RubyGenerator {
         buffer.addLine("end");
     }
 
-    private void generateParameterDocumentation(Parameter parameter) {
-        Type type = parameter.getType();
-        Name name = parameter.getName();
-        String doc = parameter.getDoc();
-        if (doc != null) {
-            String[] lines = doc.split("\\n");
-            StringBuilder buffer = new StringBuilder();
-            buffer.append(lines[0]);
-            for (int i = 1; i < lines.length; i++) {
-                buffer.append("\n");
-                buffer.append("#   ");
-                buffer.append(lines[i]);
-            }
-            doc = buffer.toString();
-        }
-        else {
-            doc = "";
-        }
-        buffer.addLine(
-            "# @option opts [%1$s] :%2$s %3$s",
-            yardDoc.getType(type),
-            rubyNames.getMemberStyleName(name),
-            doc
-        );
-    }
-
     private void generateToS(Service service) {
-        RubyName serviceName = rubyNames.getServiceName(service);
+        GoName serviceName = goNames.getServiceName(service);
         buffer.addComment();
         buffer.addComment("Returns an string representation of this service.");
         buffer.addComment();
@@ -542,9 +493,9 @@ public class ServicesGenerator implements RubyGenerator {
 
     private void generateLocatorWithParameters(Locator locator) {
         Parameter parameter = locator.parameters().findFirst().get();
-        String methodName = rubyNames.getMemberStyleName(locator.getName());
-        String argName = rubyNames.getMemberStyleName(parameter.getName());
-        RubyName serviceName = rubyNames.getServiceName(locator.getService());
+        String methodName = goNames.getMemberStyleName(locator.getName());
+        String argName = goNames.getMemberStyleName(parameter.getName());
+        GoName serviceName = goNames.getServiceName(locator.getService());
         String doc = locator.getDoc();
         if (doc == null) {
             doc = String.format("Locates the `%1$s` service.", methodName);
@@ -563,9 +514,9 @@ public class ServicesGenerator implements RubyGenerator {
     }
 
     private void generateLocatorWithoutParameters(Locator locator) {
-        String methodName = rubyNames.getMemberStyleName(locator.getName());
+        String methodName = goNames.getMemberStyleName(locator.getName());
         String urlSegment = getPath(locator.getName());
-        RubyName serviceName = rubyNames.getServiceName(locator.getService());
+        GoName serviceName = goNames.getServiceName(locator.getService());
         String doc = locator.getDoc();
         if (doc == null) {
             doc = String.format("Locates the `%1$s` service.", methodName);
@@ -599,12 +550,12 @@ public class ServicesGenerator implements RubyGenerator {
             Name name = locator.getName();
             String segment = getPath(name);
             buffer.addLine("if path == '%1$s'", segment);
-            buffer.addLine(  "return %1$s_service", rubyNames.getMemberStyleName(name));
+            buffer.addLine(  "return %1$s_service", goNames.getMemberStyleName(name));
             buffer.addLine("end");
             buffer.addLine("if path.start_with?('%1$s/')", segment);
             buffer.addLine(
                 "return %1$s_service.service(path[%2$d..-1])",
-                rubyNames.getMemberStyleName(name),
+                goNames.getMemberStyleName(name),
                 segment.length() + 1
             );
             buffer.addLine("end");
@@ -618,11 +569,11 @@ public class ServicesGenerator implements RubyGenerator {
             Name name = locator.getName();
             buffer.addLine("index = path.index('/')");
             buffer.addLine("if index.nil?");
-            buffer.addLine(  "return %1$s_service(path)", rubyNames.getMemberStyleName(name));
+            buffer.addLine(  "return %1$s_service(path)", goNames.getMemberStyleName(name));
             buffer.addLine("end");
             buffer.addLine(
                 "return %1$s_service(path[0..(index - 1)]).service(path[(index +1)..-1])",
-                rubyNames.getMemberStyleName(name)
+                goNames.getMemberStyleName(name)
             );
         }
         else {
@@ -635,9 +586,9 @@ public class ServicesGenerator implements RubyGenerator {
     }
 
     private void generateClassDeclaration(Service service) {
-        RubyName serviceName = rubyNames.getServiceName(service);
+        GoName serviceName = goNames.getServiceName(service);
         Service base = service.getBase();
-        RubyName baseName = base != null? rubyNames.getServiceName(base): rubyNames.getBaseServiceName();
+        GoName baseName = base != null? goNames.getServiceName(base): goNames.getBaseServiceName();
         buffer.addLine("class %1$s < %2$s", serviceName.getClassName(), baseName.getClassName());
     }
 

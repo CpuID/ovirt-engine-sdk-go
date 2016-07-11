@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 Red Hat, Inc.
+Copyright (c) 2015 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.ovirt.api.metamodel.tool.ReservedWords;
  * This class is a producer of the set of Java reserved words.
  */
 @Singleton
-public class RubyReservedWords {
+public class GoReservedWords {
     private Set<String> words;
 
     @PostConstruct
@@ -80,10 +80,10 @@ public class RubyReservedWords {
     }
 
     /**
-     * Produces the set of Ruby reserved words.
+     * Produces the set of reserved words.
      */
     @Produces
-    @ReservedWords(language = "ruby")
+    @ReservedWords(language = "go")
     public Set<String> getWords() {
         return words;
     }

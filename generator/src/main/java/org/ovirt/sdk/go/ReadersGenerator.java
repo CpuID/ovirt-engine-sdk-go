@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2016 Red Hat, Inc.
+Copyright (c) 2015-2016 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,16 +38,16 @@ import org.ovirt.api.metamodel.tool.SchemaNames;
 /**
  * This class is responsible for generating the classes that create instances of model types from XML documents.
  */
-public class ReadersGenerator implements RubyGenerator {
+public class ReadersGenerator implements GoGenerator {
     // The directory were the output will be generated:
     protected File out;
 
     // Reference to the objects used to generate the code:
     @Inject private SchemaNames schemaNames;
-    @Inject private RubyNames rubyNames;
+    @Inject private GoNames goNames;
 
-    // The buffer used to generate the Ruby code:
-    private RubyBuffer buffer;
+    // The buffer used to generate the Go code:
+    private GoBuffer buffer;
 
     public void setOut(File newOut) {
         out = newOut;
@@ -55,8 +55,8 @@ public class ReadersGenerator implements RubyGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = rubyNames.getModulePath() + "/readers";
-        buffer = new RubyBuffer();
+        String fileName = goNames.getModulePath() + "/readers";
+        buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
         // Generate the source:
@@ -73,7 +73,7 @@ public class ReadersGenerator implements RubyGenerator {
 
     private void generateSource(Model model) {
         // Begin module:
-        String moduleName = rubyNames.getModuleName();
+        String moduleName = goNames.getModuleName();
         buffer.beginModule(moduleName);
         buffer.addLine();
 
@@ -91,9 +91,9 @@ public class ReadersGenerator implements RubyGenerator {
 
     private void generateReader(StructType type) {
         // Begin class:
-        RubyName typeName = rubyNames.getTypeName(type);
-        RubyName readerName = rubyNames.getReaderName(type);
-        RubyName baseName = rubyNames.getBaseReaderName();
+        GoName typeName = goNames.getTypeName(type);
+        GoName readerName = goNames.getReaderName(type);
+        GoName baseName = goNames.getBaseReaderName();
         buffer.addLine("class %1$s < %2$s # :nodoc:", readerName.getClassName(), baseName.getClassName());
         buffer.addLine();
 
@@ -128,7 +128,7 @@ public class ReadersGenerator implements RubyGenerator {
         // Generate the method that reads many instances:
         buffer.addLine("def self.read_many(reader)");
         buffer.addLine(  "# Do nothing if there aren't more tags:");
-        buffer.addLine(  "list = %1$s.new", rubyNames.getBaseListName().getClassName());
+        buffer.addLine(  "list = %1$s.new", goNames.getBaseListName().getClassName());
         buffer.addLine(  "return list unless reader.forward");
         buffer.addLine();
         buffer.addLine(  "# Process the attributes:");
@@ -162,12 +162,12 @@ public class ReadersGenerator implements RubyGenerator {
             buffer.addLine(  "rel = reader.get_attribute('rel')");
             buffer.addLine(  "href = reader.get_attribute('href')");
             buffer.addLine(  "if rel && href");
-            buffer.addLine(    "list = %1$s.new", rubyNames.getBaseListName().getClassName());
+            buffer.addLine(    "list = %1$s.new", goNames.getBaseListName().getClassName());
             buffer.addLine(    "list.href = href");
             buffer.addLine(    "case rel");
             listLinks.forEach(link -> {
                 Name name = link.getName();
-                String property = rubyNames.getMemberStyleName(name);
+                String property = goNames.getMemberStyleName(name);
                 String rel = name.words().map(String::toLowerCase).collect(joining());
                 buffer.addLine("when '%1$s'", rel);
                 buffer.addLine(  "object.%1$s = list", property);
@@ -195,7 +195,7 @@ public class ReadersGenerator implements RubyGenerator {
         Name name = member.getName();
         Type type = member.getType();
         if (type instanceof PrimitiveType || type instanceof EnumType) {
-            String property = rubyNames.getMemberStyleName(name);
+            String property = goNames.getMemberStyleName(name);
             String tag = schemaNames.getSchemaTagName(name);
             buffer.addLine("value = reader.get_attribute('%s')", tag);
             buffer.addLine("object.%1$s = value if not value.nil?", property);
@@ -231,7 +231,7 @@ public class ReadersGenerator implements RubyGenerator {
     private void generateElementRead(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = rubyNames.getMemberStyleName(name);
+        String property = goNames.getMemberStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
         String variable = String.format("object.%1$s", property);
         buffer.addLine("when '%1$s'", tag);
@@ -280,7 +280,7 @@ public class ReadersGenerator implements RubyGenerator {
     }
 
     private void generateReadStruct(StructMember member, String variable) {
-        RubyName readerName = rubyNames.getReaderName(member.getType());
+        GoName readerName = goNames.getReaderName(member.getType());
         buffer.addLine("%1$s = %2$s.read_one(reader)", variable, readerName.getClassName());
     }
 
@@ -291,7 +291,7 @@ public class ReadersGenerator implements RubyGenerator {
             buffer.addLine("reader.next_element");
         }
         else if (elementType instanceof StructType) {
-            RubyName readerName = rubyNames.getReaderName(elementType);
+            GoName readerName = goNames.getReaderName(elementType);
             buffer.addLine("%1$s = %2$s.read_many(reader)", variable, readerName.getClassName());
         }
         else {

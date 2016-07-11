@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 Red Hat, Inc.
+Copyright (c) 2015 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.ovirt.api.metamodel.tool.Words;
  * This class contains the rules used to calculate the names of generated Java concepts.
  */
 @ApplicationScoped
-public class RubyNames {
+public class GoNames {
     // The names of the base classes:
     public static final Name ACTION_NAME = NameParser.parseUsingCase("Action");
     public static final Name FAULT_NAME = NameParser.parseUsingCase("Fault");
@@ -55,9 +55,9 @@ public class RubyNames {
     // Reference to the object used to do computations with words.
     @Inject private Words words;
 
-    // We need the Ruby reserved words in order to avoid producing names that aren't legal in Java:
+    // We need the Go reserved words in order to avoid producing names that aren't legal in Java:
     @Inject
-    @ReservedWords(language = "ruby")
+    @ReservedWords(language = "go")
     private Set<String> reservedWords;
 
     // The name and path of the module:
@@ -109,98 +109,98 @@ public class RubyNames {
     }
 
     /**
-     * Calculates the Ruby name of the base class of the struct types.
+     * Calculates the Go name of the base class of the struct types.
      */
-    public RubyName getBaseStructName() {
+    public GoName getBaseStructName() {
         return buildName(STRUCT_NAME, null, TYPES_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the base class of the list types.
+     * Calculates the Go name of the base class of the list types.
      */
-    public RubyName getBaseListName() {
+    public GoName getBaseListName() {
         return buildName(LIST_NAME, null, TYPES_DIR);
     }
 
     /**
-     * Calculates the Ruby name that corresponds to the given type.
+     * Calculates the Go name that corresponds to the given type.
      */
-    public RubyName getTypeName(Type type) {
+    public GoName getTypeName(Type type) {
         return buildName(type.getName(), null, TYPES_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the base class of the services.
+     * Calculates the Go name of the base class of the services.
      */
-    public RubyName getBaseServiceName() {
+    public GoName getBaseServiceName() {
         return buildName(SERVICE_NAME, null, SERVICES_DIR);
     }
 
     /**
-     * Calculates the Ruby name that corresponds to the given service.
+     * Calculates the Go name that corresponds to the given service.
      */
-    public RubyName getServiceName(Service service) {
+    public GoName getServiceName(Service service) {
         return buildName(service.getName(), SERVICE_NAME, SERVICES_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the base class of the readers.
+     * Calculates the Go name of the base class of the readers.
      */
-    public RubyName getBaseReaderName() {
+    public GoName getBaseReaderName() {
         return buildName(READER_NAME, null, READERS_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the base class of the writers.
+     * Calculates the Go name of the base class of the writers.
      */
-    public RubyName getBaseWriterName() {
+    public GoName getBaseWriterName() {
         return buildName(WRITER_NAME, null, WRITERS_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the reader for the given type.
+     * Calculates the Go name of the reader for the given type.
      */
-    public RubyName getReaderName(Type type) {
+    public GoName getReaderName(Type type) {
         return buildName(type.getName(), READER_NAME, READERS_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the writer for the given type.
+     * Calculates the Go name of the writer for the given type.
      */
-    public RubyName getWriterName(Type type) {
+    public GoName getWriterName(Type type) {
         return buildName(type.getName(), WRITER_NAME, WRITERS_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the fault class.
+     * Calculates the Go name of the fault class.
      */
-    public RubyName getFaultName() {
+    public GoName getFaultName() {
         return buildName(FAULT_NAME, null, TYPES_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the fault reader.
+     * Calculates the Go name of the fault reader.
      */
-    public RubyName getFaultReaderName() {
+    public GoName getFaultReaderName() {
         return buildName(FAULT_NAME, READER_NAME, READERS_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the action class.
+     * Calculates the Go name of the action class.
      */
-    public RubyName getActionName() {
+    public GoName getActionName() {
         return buildName(ACTION_NAME, null, TYPES_DIR);
     }
 
     /**
-     * Calculates the Ruby name of the action reader.
+     * Calculates the Go name of the action reader.
      */
-    public RubyName getActionReaderName() {
+    public GoName getActionReaderName() {
         return buildName(ACTION_NAME, READER_NAME, READERS_DIR);
     }
 
     /**
-     * Builds a Ruby name from the given base name and suffix, and a directory.
+     * Builds a Go name from the given base name and suffix, and a directory.
      *
      * The suffix can be {@code null} or empty, in that case then won't be added.
      *
@@ -210,16 +210,16 @@ public class RubyNames {
      * @param base the base name
      * @param suffix the suffix to add to the name
      * @param directory the directory associated to the name
-     * @return the calculated Ruby name
+     * @return the calculated Go name
      */
-    private RubyName buildName(Name base, Name suffix, Name directory) {
+    private GoName buildName(Name base, Name suffix, Name directory) {
         // Calculate class name:
         List<String> words = base.getWords();
         if (suffix != null) {
             words.addAll(suffix.getWords());
         }
         Name name = new Name(words);
-        RubyName result = new RubyName();
+        GoName result = new GoName();
         result.setClassName(getClassStyleName(name));
 
         // Calculate the module name:
@@ -240,14 +240,14 @@ public class RubyNames {
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Ruby classes.
+     * Returns a representation of the given name using the capitalization style typically used for Go classes.
      */
     public String getClassStyleName(Name name) {
         return name.words().map(words::capitalize).collect(joining());
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Ruby members.
+     * Returns a representation of the given name using the capitalization style typically used for Go members.
      */
     public String getMemberStyleName(Name name) {
         String result = name.words().map(String::toLowerCase).collect(joining("_"));
@@ -258,14 +258,14 @@ public class RubyNames {
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Ruby constants.
+     * Returns a representation of the given name using the capitalization style typically used for Go constants.
      */
     public String getConstantStyleName(Name name) {
         return name.words().map(String::toUpperCase).collect(joining("_"));
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Ruby files.
+     * Returns a representation of the given name using the capitalization style typically used for Go files.
      */
     public String getFileStyleName(Name name) {
         return name.words().map(String::toLowerCase).collect(joining("_"));

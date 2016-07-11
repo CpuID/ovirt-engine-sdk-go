@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 Red Hat, Inc.
+Copyright (c) 2015 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 
 /**
- * This class is a buffer intended to simplify generation of Ruby source code. It stores the name of the module, the
+ * This class is a buffer intended to simplify generation of Go source code. It stores the name of the module, the
  * list of requires and the rest of the source separately, so that requires can be added on demand while generating the
  * rest of the source.
  */
-public class RubyBuffer {
-    // Reference to the object used to generate Ruby names:
-    @Inject private RubyNames rubyNames;
+public class GoBuffer {
+    // Reference to the object used to generate Go names:
+    @Inject private GoNames goNames;
 
     // The name of the file:
     private String fileName;
@@ -228,7 +228,7 @@ public class RubyBuffer {
 
         // License:
         buffer.append("#\n");
-        buffer.append("# Copyright (c) 2015-2016 Red Hat, Inc.\n");
+        buffer.append("# Copyright (c) 2015-2016 Red Hat, Inc. / Nathan Sullivan\n");
         buffer.append("#\n");
         buffer.append("# Licensed under the Apache License, Version 2.0 (the \"License\");\n");
         buffer.append("# you may not use this file except in compliance with the License.\n");

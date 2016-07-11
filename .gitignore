@@ -22,3 +22,20 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# Some stuff from https://github.com/oVirt/ovirt-engine-sdk-ruby/blob/master/.gitignore
+*.class
+*.iml
+*.rpm
+*.so
+*.tar.gz
+.bash_history
+.idea/
+exported-artifacts/
+sdk/doc/
+sdk/pkg/
+sdk/spec/access.log
+sdk/spec/server.log
+sdk/tmp/
+settings.xml
+target/

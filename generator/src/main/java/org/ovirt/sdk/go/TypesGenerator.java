@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2016 Red Hat, Inc.
+Copyright (c) 2015-2016 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,16 +40,15 @@ import org.ovirt.api.metamodel.concepts.Type;
 /**
  * This class is responsible for generating the classes that represent the types of the model.
  */
-public class TypesGenerator implements RubyGenerator {
+public class TypesGenerator implements GoGenerator {
     // The directory were the output will be generated:
     protected File out;
 
     // Reference to the objects used to generate the code:
-    @Inject private RubyNames rubyNames;
-    @Inject private YardDoc yardDoc;
+    @Inject private GoNames goNames;
 
-    // The buffer used to generate the Ruby code:
-    private RubyBuffer buffer;
+    // The buffer used to generate the Go code:
+    private GoBuffer buffer;
 
     public void setOut(File newOut) {
         out = newOut;
@@ -57,12 +56,12 @@ public class TypesGenerator implements RubyGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = rubyNames.getModulePath() + "/types";
-        buffer = new RubyBuffer();
+        String fileName = goNames.getModulePath() + "/types";
+        buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
         // Begin module:
-        buffer.beginModule(rubyNames.getModuleName());
+        buffer.beginModule(goNames.getModuleName());
         buffer.addLine();
 
         // Generate the source:
@@ -70,7 +69,7 @@ public class TypesGenerator implements RubyGenerator {
         generateEnums(model);
 
         // End module:
-        buffer.endModule(rubyNames.getModuleName());
+        buffer.endModule(goNames.getModuleName());
         buffer.addLine();
 
         // Write the file:
@@ -131,7 +130,7 @@ public class TypesGenerator implements RubyGenerator {
         members.stream().sorted().forEach(this::generateMember);
 
         // Constructor with a named parameter for each attribute:
-        RubyName typeName = rubyNames.getTypeName(type);
+        GoName typeName = goNames.getTypeName(type);
         buffer.addComment();
         buffer.addComment("Creates a new instance of the {%1$s} class.", typeName.getClassName());
         buffer.addComment();
@@ -142,18 +141,17 @@ public class TypesGenerator implements RubyGenerator {
         members.stream().sorted().forEach(member -> {
             Type memberType = member.getType();
             Name memberName = member.getName();
-            String docType = yardDoc.getType(memberType);
-            String docName = rubyNames.getMemberStyleName(memberName);
+            String docName = goNames.getMemberStyleName(memberName);
             if (memberType instanceof PrimitiveType || memberType instanceof EnumType) {
-                buffer.addComment("@option opts [%1$s] :%2$s The value of attribute `%2$s`.", docType, docName);
+                buffer.addComment("@option opts :%1$s The value of attribute `%1$s`.", docName);
                 buffer.addComment();
             }
             else if (memberType instanceof StructType) {
-                buffer.addComment("@option opts [%1$s, Hash] :%2$s The value of attribute `%2$s`.", docType, docName);
+                buffer.addComment("@option opts [Hash] :%1$s The value of attribute `%1$s`.", docName);
                 buffer.addComment();
             }
             else if (memberType instanceof ListType) {
-                buffer.addComment("@option opts [%1$s, Array<Hash>] :%2$s The values of attribute `%2$s`.", docType, docName);
+                buffer.addComment("@option opts [Array<Hash>] :%1$s The values of attribute `%1$s`.", docName);
                 buffer.addComment();
             }
         });
@@ -161,7 +159,7 @@ public class TypesGenerator implements RubyGenerator {
         buffer.addLine("def initialize(opts = {})");
         buffer.addLine(  "super(opts)");
         members.stream().sorted().forEach(member -> {
-            String memberName = rubyNames.getMemberStyleName(member.getName());
+            String memberName = goNames.getMemberStyleName(member.getName());
             buffer.addLine("self.%1$s = opts[:%1$s]", memberName);
         });
         buffer.addLine("end");
@@ -180,11 +178,9 @@ public class TypesGenerator implements RubyGenerator {
     private void generateGetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = rubyNames.getMemberStyleName(name);
+        String property = goNames.getMemberStyleName(name);
         buffer.addComment();
         buffer.addComment("Returns the value of the `%1$s` attribute.", property);
-        buffer.addComment();
-        buffer.addComment("@return [%1$s]", yardDoc.getType(type));
         buffer.addComment();
         buffer.addLine("def %1$s", property);
         buffer.addLine(  "return @%1$s", property);
@@ -195,20 +191,18 @@ public class TypesGenerator implements RubyGenerator {
     private void generateSetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = rubyNames.getMemberStyleName(name);
+        String property = goNames.getMemberStyleName(name);
         buffer.addComment();
         buffer.addComment("Sets the value of the `%1$s` attribute.", property);
         buffer.addComment();
         if (type instanceof PrimitiveType || type instanceof EnumType) {
-            buffer.addComment("@param value [%1$s]", yardDoc.getType(type));
-            buffer.addComment();
             buffer.addLine("def %1$s=(value)", property);
             buffer.addLine(  "@%1$s = value", property);
             buffer.addLine("end");
         }
         else if (type instanceof StructType) {
-            RubyName typeName = rubyNames.getTypeName(type);
-            buffer.addComment("@param value [%1$s, Hash]", yardDoc.getType(type));
+            GoName typeName = goNames.getTypeName(type);
+            buffer.addComment("@param value [Hash]");
             buffer.addComment();
             buffer.addComment("The `value` parameter can be an instance of {%1$s} or a hash.", typeName);
             buffer.addComment("If it is a hash then a new instance will be created passing the hash as the ");
@@ -222,7 +216,6 @@ public class TypesGenerator implements RubyGenerator {
             buffer.addLine("end");
         }
         else if (type instanceof ListType) {
-            buffer.addComment("@param list [%1$s]", yardDoc.getType(type));
             ListType listType = (ListType) type;
             Type elementType = listType.getElementType();
             if (elementType instanceof PrimitiveType || elementType instanceof EnumType) {
@@ -231,7 +224,7 @@ public class TypesGenerator implements RubyGenerator {
                 buffer.addLine("end");
             }
             else if (elementType instanceof StructType) {
-                RubyName elementTypeName = rubyNames.getTypeName(elementType);
+                GoName elementTypeName = goNames.getTypeName(elementType);
                 buffer.addLine("def %1$s=(list)", property);
                 buffer.addLine(  "if list.class == Array");
                 buffer.addLine(    "list = List.new(list)");
@@ -258,7 +251,7 @@ public class TypesGenerator implements RubyGenerator {
 
     private void generateEnum(EnumType type) {
         // Begin module:
-        RubyName typeName = rubyNames.getTypeName(type);
+        GoName typeName = goNames.getTypeName(type);
         buffer.beginModule(typeName.getClassName());
 
         // Values:
@@ -270,15 +263,15 @@ public class TypesGenerator implements RubyGenerator {
     }
 
     private void generateEnumValue(EnumValue value) {
-        String constantName = rubyNames.getConstantStyleName(value.getName());
-        String constantValue = rubyNames.getMemberStyleName(value.getName());
+        String constantName = goNames.getConstantStyleName(value.getName());
+        String constantValue = goNames.getMemberStyleName(value.getName());
         buffer.addLine("%s = '%s'.freeze", constantName, constantValue);
     }
 
     private void generateClassDeclaration(StructType type) {
-        RubyName typeName = rubyNames.getTypeName(type);
+        GoName typeName = goNames.getTypeName(type);
         Type base = type.getBase();
-        RubyName baseName = base != null? rubyNames.getTypeName(base): rubyNames.getBaseStructName();
+        GoName baseName = base != null? goNames.getTypeName(base): goNames.getBaseStructName();
         buffer.addLine("class %1$s < %2$s", typeName.getClassName(), baseName.getClassName());
     }
 }

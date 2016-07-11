@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 Red Hat, Inc.
+Copyright (c) 2015 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.ovirt.api.metamodel.concepts.Model;
  * of them it will set the output file and invoke the {@link #generate(Model)} method. No specific order will be
  * used when there are multiple generators.
  */
-public interface RubyGenerator {
+public interface GoGenerator {
     /**
      * Set the directory were the output should be generated.
      */

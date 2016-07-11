@@ -1,5 +1,5 @@
-= oVirt Engine Ruby SDK Generator
+= oVirt Engine Go SDK Generator
 
 == Introduction
 
-This project contains the code generator for the oVirt Ruby SDK.
+This project contains the code generator for the oVirt Go SDK.

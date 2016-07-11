@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 Red Hat, Inc.
+Copyright (c) 2015 Red Hat, Inc. / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ limitations under the License.
 package org.ovirt.sdk.go;
 
 /**
- * This class represents the fully qualified name of a Ruby class, composed by the module name, the class name and the
+ * This class represents the fully qualified name of a Go class, composed by the module name, the class name and the
  * name of the file where it should be stored.
  */
-public class RubyName {
+public class GoName {
     private String moduleName;
     private String className;
     private String fileName;
