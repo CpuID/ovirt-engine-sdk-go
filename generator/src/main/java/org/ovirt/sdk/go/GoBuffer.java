@@ -264,7 +264,7 @@ public class GoBuffer {
     }
 
     /**
-     * Creates a {@code .rb} source file and writes the source. The required intermediate directories will be created
+     * Creates a {@code .go} source file and writes the source. The required intermediate directories will be created
      * if they don't exist.
      *
      * @param dir the base directory for the source code
@@ -272,7 +272,7 @@ public class GoBuffer {
      */
     public void write(File dir) throws IOException {
         // Calculate the complete fille name:
-        File file = new File(dir, fileName.replace('/', File.separatorChar) + ".rb");
+        File file = new File(dir, fileName.replace('/', File.separatorChar) + ".go");
 
         // Create the directory and all its parent if needed:
         File parent = file.getParentFile();
