@@ -13,7 +13,7 @@ instructions in the `README.adoc` file of the parent directory.
 
 == Usage
 
-To use the SDK import the package `github.com/CpuID/ovirt-engine-sdk-go/sdk`. That will give you
+To use the SDK import the package `github.com/CpuID/ovirt-engine-sdk-go/sdk/ovirtsdk4`. That will give you
 access to all the classes of the SDK, and in particular to the
 
 # TODO: review below here.

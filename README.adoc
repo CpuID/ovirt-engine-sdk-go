@@ -50,7 +50,7 @@ in any Go application with an `import`:
 
 ```
 import (
-  "github.com/CpuID/ovirt-engine-sdk-go/sdk"
+  "github.com/CpuID/ovirt-engine-sdk-go/sdk/ovirtsdk4"
 )
 ```
 
