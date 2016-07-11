@@ -1,8 +1,8 @@
-= oVirt Engine API Ruby SDK
+= oVirt Engine API Go SDK
 
 == Introduction
 
-This project contains the Ruby SDK for the oVirt Engine API.
+This project contains the Go SDK for the oVirt Engine API.
 
 == Important
 
@@ -13,8 +13,11 @@ instructions in the `README.adoc` file of the parent directory.
 
 == Usage
 
-To use the SDK require the `ovirtsdk4` file. That will give you
+To use the SDK import the package `github.com/CpuID/ovirt-engine-sdk-go/sdk`. That will give you
 access to all the classes of the SDK, and in particular to the
+
+# TODO: review below here.
+
 {OvirtSDK4::Connection} class. This is the entry point of the SDK,
 and gives you access to the root of the tree of services of the API:
 
