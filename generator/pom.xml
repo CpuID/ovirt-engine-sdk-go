@@ -29,7 +29,7 @@ limitations under the License.
     <version>4.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>go-sdk-parent</artifactId>
+  <artifactId>go-sdk-generator</artifactId>
   <packaging>jar</packaging>
 
   <name>oVirt Go SDK Generator</name>

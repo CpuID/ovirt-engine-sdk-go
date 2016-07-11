@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright (c) 2015 Red Hat, Inc.
+Copyright (c) 2016 Red Hat, Inc / Nathan Sullivan
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ limitations under the License.
 
   <parent>
     <groupId>org.ovirt.engine.api</groupId>
-    <artifactId>ruby-sdk-parent</artifactId>
-    <version>4.1.0.alpha1-SNAPSHOT</version>
+    <artifactId>go-sdk-parent</artifactId>
+    <version>4.0.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>ruby-sdk</artifactId>
+  <artifactId>go-sdk</artifactId>
   <packaging>pom</packaging>
 
-  <name>oVirt Ruby SDK Gem</name>
+  <name>oVirt Go SDK Gem</name>
 
   <properties>
 
@@ -91,28 +91,13 @@ limitations under the License.
             <configuration>
               <mainClass>org.ovirt.api.metamodel.tool.Main</mainClass>
               <arguments>
-                <argument>org.ovirt.sdk.ruby.Tool</argument>
+                <argument>org.ovirt.sdk.go.Tool</argument>
                 <argument>--model=${project.basedir}/target/model.jar</argument>
                 <argument>--out=${project.basedir}/lib</argument>
                 <argument>--version=${sdk.version}</argument>
               </arguments>
               <includePluginDependencies>true</includePluginDependencies>
               <includeProjectDependencies>false</includeProjectDependencies>
-            </configuration>
-          </execution>
-
-          <!-- Compile the extension: -->
-          <execution>
-            <id>compile-extension</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>rake</executable>
-              <arguments>
-                <argument>compile</argument>
-              </arguments>
             </configuration>
           </execution>
 
@@ -124,24 +109,9 @@ limitations under the License.
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>rake</executable>
+              <executable>go</executable>
               <arguments>
                 <argument>test</argument>
-              </arguments>
-            </configuration>
-          </execution>
-
-          <!-- Generate the .gem file: -->
-          <execution>
-            <id>build-gem</id>
-            <phase>package</phase>
-            <goals>
-              <goal>exec</goal>
-            </goals>
-            <configuration>
-              <executable>rake</executable>
-              <arguments>
-                <argument>gem</argument>
               </arguments>
             </configuration>
           </execution>
@@ -150,7 +120,7 @@ limitations under the License.
         <dependencies>
           <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>ruby-sdk-generator</artifactId>
+            <artifactId>go-sdk-generator</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>
