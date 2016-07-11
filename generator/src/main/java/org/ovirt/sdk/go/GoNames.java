@@ -61,24 +61,24 @@ public class GoNames {
     private Set<String> reservedWords;
 
     // The name and path of the module:
-    private String moduleName = "OvirtSDK4";
-    private String modulePath = "ovirtsdk4";
+    private String packageName = "ovirtsdk4";
+    private String packagePath = "ovirtsdk4";
 
     // The version of the gem:
     private String version;
 
     /**
-     * Get the module name.
+     * Get the package name.
      */
-    public String getModuleName() {
-        return moduleName;
+    public String getPackageName() {
+        return packageName;
     }
 
     /**
-     * Get the path of the module.
+     * Get the path of the package.
      */
-    public String getModulePath() {
-        return modulePath;
+    public String getPackagePath() {
+        return packagePath;
     }
 
     /**
@@ -89,21 +89,21 @@ public class GoNames {
     }
 
     /**
-     * Set the versoin.
+     * Set the version.
      */
     public void setVersion(String newVersion) {
         version = newVersion;
     }
 
     /**
-     * Set the module name.
+     * Set the package name.
      */
-    public void setModuleName(String newModule) {
+    public void setPackageName(String newPackage) {
         // Save the name:
-        moduleName = newModule;
+        packageName = newPackage;
 
         // Calculate the path:
-        modulePath = Arrays.stream(moduleName.split("::"))
+        packagePath = Arrays.stream(packageName.split("::"))
             .map(String::toLowerCase)
             .collect(joining("/"));
     }
@@ -223,11 +223,11 @@ public class GoNames {
         result.setClassName(getClassStyleName(name));
 
         // Calculate the module name:
-        result.setModuleName(moduleName);
+        result.setPackageName(packageName);
 
         // Calculate the file name:
         StringBuilder fileName = new StringBuilder();
-        fileName.append(modulePath);
+        fileName.append(packagePath);
         fileName.append(File.separator);
         if (directory != null) {
             fileName.append(getFileStyleName(directory));

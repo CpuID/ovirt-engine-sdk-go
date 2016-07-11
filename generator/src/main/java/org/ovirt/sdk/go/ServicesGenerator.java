@@ -71,7 +71,7 @@ public class ServicesGenerator implements GoGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = goNames.getModulePath() + "/services";
+        String fileName = goNames.getPackagePath() + "/services";
         buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
@@ -92,8 +92,7 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addComment();
         buffer.addComment("These forward declarations are required in order to avoid circular dependencies.");
         buffer.addComment();
-        String moduleName = goNames.getModuleName();
-        buffer.beginModule(moduleName);
+        buffer.beginPackage(goNames.getPackageName());
         buffer.addLine();
 
         // The declarations of the services need to appear in inheritance order, otherwise some symbols won't be
@@ -123,11 +122,6 @@ public class ServicesGenerator implements GoGenerator {
 
         // Generate the complete declarations, using the same order:
         sorted.forEach(this::generateService);
-
-        // End module:
-        buffer.endModule(moduleName);
-        buffer.addLine();
-
     }
 
     private void generateService(Service service) {

@@ -56,21 +56,17 @@ public class TypesGenerator implements GoGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = goNames.getModulePath() + "/types";
+        String fileName = goNames.getPackagePath() + "/types";
         buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
         // Begin module:
-        buffer.beginModule(goNames.getModuleName());
+        buffer.beginPackage(goNames.getPackageName());
         buffer.addLine();
 
         // Generate the source:
         generateStructs(model);
         generateEnums(model);
-
-        // End module:
-        buffer.endModule(goNames.getModuleName());
-        buffer.addLine();
 
         // Write the file:
         try {
@@ -252,14 +248,10 @@ public class TypesGenerator implements GoGenerator {
     private void generateEnum(EnumType type) {
         // Begin module:
         GoName typeName = goNames.getTypeName(type);
-        buffer.beginModule(typeName.getClassName());
+        buffer.beginPackage(typeName.getClassName());
 
         // Values:
         type.values().sorted().forEach(this::generateEnumValue);
-
-        // End module:
-        buffer.endModule(typeName.getClassName());
-        buffer.addLine();
     }
 
     private void generateEnumValue(EnumValue value) {

@@ -50,8 +50,8 @@ public class GoBuffer {
     // The things to be required, without the "required" keyword and quotes.
     private Set<String> requires = new HashSet<>();
 
-    // The stack of module names:
-    private Deque<String> moduleStack = new ArrayDeque<>();
+    // The stack of package names:
+    private Deque<String> packageStack = new ArrayDeque<>();
 
     // The lines of the body of the class:
     private List<String> lines = new ArrayList<>();
@@ -67,24 +67,13 @@ public class GoBuffer {
     }
 
     /**
-     * Begins the given module name, which may be separated with {@code ::}, and writes the corresponding {@code module}
+     * Begins the given package name, which may be separated with {@code ::}, and writes the corresponding {@code package}
      * statements.
      */
-    public void beginModule(String moduleName) {
-        Arrays.stream(moduleName.split("::")).forEach(x -> {
-            moduleStack.push(x);
-            addLine("module %1$s", x);
-        });
-    }
-
-    /**
-     * Ends the given module name, which may be separated with {@code ::}, and writes the corresponding {@code end}
-     * statements.
-     */
-    public void endModule(String moduleName) {
-        Arrays.stream(moduleName.split("::")).forEach(x -> {
-            addLine("end");
-            moduleStack.pop();
+    public void beginPackage(String packageName) {
+        Arrays.stream(packageName.split("::")).forEach(x -> {
+            packageStack.push(x);
+            addLine("package %1$s", x);
         });
     }
 
@@ -271,7 +260,7 @@ public class GoBuffer {
      * @throws IOException if something fails while creating or writing the file
      */
     public void write(File dir) throws IOException {
-        // Calculate the complete fille name:
+        // Calculate the complete file name:
         File file = new File(dir, fileName.replace('/', File.separatorChar) + ".go");
 
         // Create the directory and all its parent if needed:

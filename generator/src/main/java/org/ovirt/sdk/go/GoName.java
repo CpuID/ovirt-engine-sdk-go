@@ -17,20 +17,20 @@ limitations under the License.
 package org.ovirt.sdk.go;
 
 /**
- * This class represents the fully qualified name of a Go class, composed by the module name, the class name and the
+ * This class represents the fully qualified name of a Go class, composed by the package name, the class name and the
  * name of the file where it should be stored.
  */
 public class GoName {
-    private String moduleName;
+    private String packageName;
     private String className;
     private String fileName;
 
-    public String getModuleName() {
-        return moduleName;
+    public String getPackageName() {
+        return packageName;
     }
 
-    public void setModuleName(String newModuleName) {
-        moduleName = newModuleName;
+    public void setPackageName(String newPackageName) {
+        packageName = newPackageName;
     }
 
     public String getClassName() {
@@ -52,7 +52,7 @@ public class GoName {
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(moduleName);
+        buffer.append(packageName);
         buffer.append("::");
         buffer.append(className);
         return buffer.toString();

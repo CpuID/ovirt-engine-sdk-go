@@ -53,7 +53,7 @@ public class WritersGenerator implements GoGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = goNames.getModulePath() + "/writers";
+        String fileName = goNames.getPackagePath() + "/writers";
         buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
@@ -70,9 +70,8 @@ public class WritersGenerator implements GoGenerator {
     }
 
     private void generateSource(Model model) {
-        // Begin module:
-        String moduleName = goNames.getModuleName();
-        buffer.beginModule(moduleName);
+        // Begin package:
+        buffer.beginPackage(goNames.getPackageName());
         buffer.addLine();
 
         // Generate a writer for each struct type:
@@ -81,9 +80,6 @@ public class WritersGenerator implements GoGenerator {
             .map(StructType.class::cast)
             .sorted()
             .forEach(this::generateWriter);
-
-        // End module:
-        buffer.endModule(moduleName);
     }
 
     private void generateWriter(StructType type) {

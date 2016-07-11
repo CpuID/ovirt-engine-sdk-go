@@ -55,7 +55,7 @@ public class ReadersGenerator implements GoGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = goNames.getModulePath() + "/readers";
+        String fileName = goNames.getPackagePath() + "/readers";
         buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
@@ -72,9 +72,8 @@ public class ReadersGenerator implements GoGenerator {
     }
 
     private void generateSource(Model model) {
-        // Begin module:
-        String moduleName = goNames.getModuleName();
-        buffer.beginModule(moduleName);
+        // Begin package:
+        buffer.beginPackage(goNames.getPackageName());
         buffer.addLine();
 
         // Generate a reader for each struct type:
@@ -83,10 +82,6 @@ public class ReadersGenerator implements GoGenerator {
             .map(StructType.class::cast)
             .sorted()
             .forEach(this::generateReader);
-
-        // End module:
-        buffer.endModule(moduleName);
-        buffer.addLine();
     }
 
     private void generateReader(StructType type) {

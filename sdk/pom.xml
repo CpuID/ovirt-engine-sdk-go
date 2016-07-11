@@ -94,7 +94,6 @@ limitations under the License.
                 <argument>org.ovirt.sdk.go.Tool</argument>
                 <argument>--model=${project.basedir}/target/model.jar</argument>
                 <argument>--out=${project.basedir}</argument>
-                <argument>--version=${sdk.version}</argument>
               </arguments>
               <includePluginDependencies>true</includePluginDependencies>
               <includeProjectDependencies>false</includeProjectDependencies>
