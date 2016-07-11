@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package org.ovirt.sdk.ruby;
+package org.ovirt.sdk.go;
 
 import java.io.File;
 import javax.enterprise.context.ApplicationScoped;

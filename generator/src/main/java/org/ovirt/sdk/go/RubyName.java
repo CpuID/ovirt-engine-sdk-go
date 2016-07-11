@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package org.ovirt.sdk.ruby;
+package org.ovirt.sdk.go;
 
 /**
  * This class represents the fully qualified name of a Ruby class, composed by the module name, the class name and the
