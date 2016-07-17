@@ -70,10 +70,6 @@ public class WritersGenerator implements GoGenerator {
     }
 
     private void generateSource(Model model) {
-        // Begin package:
-        buffer.beginPackage(goNames.getPackageName());
-        buffer.addLine();
-
         // Generate a writer for each struct type:
         model.types()
             .filter(StructType.class::isInstance)

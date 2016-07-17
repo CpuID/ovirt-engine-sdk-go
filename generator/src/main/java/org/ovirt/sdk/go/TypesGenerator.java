@@ -60,10 +60,6 @@ public class TypesGenerator implements GoGenerator {
         buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
-        // Begin module:
-        buffer.beginPackage(goNames.getPackageName());
-        buffer.addLine();
-
         // Generate the source:
         generateStructs(model);
         generateEnums(model);
@@ -246,10 +242,6 @@ public class TypesGenerator implements GoGenerator {
     }
 
     private void generateEnum(EnumType type) {
-        // Begin module:
-        GoName typeName = goNames.getTypeName(type);
-        buffer.beginPackage(typeName.getClassName());
-
         // Values:
         type.values().sorted().forEach(this::generateEnumValue);
     }

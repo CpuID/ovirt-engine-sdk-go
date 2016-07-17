@@ -50,9 +50,6 @@ public class GoBuffer {
     // The things to be required, without the "required" keyword and quotes.
     private Set<String> requires = new HashSet<>();
 
-    // The stack of package names:
-    private Deque<String> packageStack = new ArrayDeque<>();
-
     // The lines of the body of the class:
     private List<String> lines = new ArrayList<>();
 
@@ -64,17 +61,6 @@ public class GoBuffer {
      */
     public void setFileName(String newFileName) {
         fileName = newFileName;
-    }
-
-    /**
-     * Begins the given package name, which may be separated with {@code ::}, and writes the corresponding {@code package}
-     * statements.
-     */
-    public void beginPackage(String packageName) {
-        Arrays.stream(packageName.split("::")).forEach(x -> {
-            packageStack.push(x);
-            addLine("package %1$s", x);
-        });
     }
 
     /**
@@ -184,7 +170,7 @@ public class GoBuffer {
         for (int i = 0; i < level; i++) {
             buffer.append("  ");
         }
-        buffer.append("# ");
+        buffer.append("// ");
         buffer.append(line);
         line = buffer.toString();
         lines.add(line);
@@ -216,31 +202,36 @@ public class GoBuffer {
         StringBuilder buffer = new StringBuilder();
 
         // License:
-        buffer.append("#\n");
-        buffer.append("# Copyright (c) 2015-2016 Red Hat, Inc. / Nathan Sullivan\n");
-        buffer.append("#\n");
-        buffer.append("# Licensed under the Apache License, Version 2.0 (the \"License\");\n");
-        buffer.append("# you may not use this file except in compliance with the License.\n");
-        buffer.append("# You may obtain a copy of the License at\n");
-        buffer.append("#\n");
-        buffer.append("#   http://www.apache.org/licenses/LICENSE-2.0\n");
-        buffer.append("#\n");
-        buffer.append("# Unless required by applicable law or agreed to in writing, software\n");
-        buffer.append("# distributed under the License is distributed on an \"AS IS\" BASIS,\n");
-        buffer.append("# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n");
-        buffer.append("# See the License for the specific language governing permissions and\n");
-        buffer.append("# limitations under the License.\n");
-        buffer.append("#\n");
+        buffer.append("//\n");
+        buffer.append("// Copyright (c) 2015-2016 Red Hat, Inc. / Nathan Sullivan\n");
+        buffer.append("//\n");
+        buffer.append("// Licensed under the Apache License, Version 2.0 (the \"License\");\n");
+        buffer.append("// you may not use this file except in compliance with the License.\n");
+        buffer.append("// You may obtain a copy of the License at\n");
+        buffer.append("//\n");
+        buffer.append("//   http://www.apache.org/licenses/LICENSE-2.0\n");
+        buffer.append("//\n");
+        buffer.append("// Unless required by applicable law or agreed to in writing, software\n");
+        buffer.append("// distributed under the License is distributed on an \"AS IS\" BASIS,\n");
+        buffer.append("// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n");
+        buffer.append("// See the License for the specific language governing permissions and\n");
+        buffer.append("// limitations under the License.\n");
+        buffer.append("//\n");
+        buffer.append("\n");
+        buffer.append("package ovirtsdk4\n");
         buffer.append("\n");
 
-        // Require:
-        List<String> requiresList = new ArrayList<>(requires);
-        Collections.sort(requiresList);
-        for (String requiresItem : requiresList) {
-            buffer.append("require '");
-            buffer.append(requiresItem);
-            buffer.append("'\n");
+        // Imports:
+        // TODO: requires should be imports
+        List<String> importList = new ArrayList<>(requires);
+        Collections.sort(importList);
+        buffer.append("import (\n");
+        for (String importItem : importList) {
+            buffer.append("  \"");
+            buffer.append(importItem);
+            buffer.append("\"\n");
         }
+        buffer.append(")\n");
         buffer.append("\n");
 
         // Body:

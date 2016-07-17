@@ -92,8 +92,6 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addComment();
         buffer.addComment("These forward declarations are required in order to avoid circular dependencies.");
         buffer.addComment();
-        buffer.beginPackage(goNames.getPackageName());
-        buffer.addLine();
 
         // The declarations of the services need to appear in inheritance order, otherwise some symbols won't be
         // defined and that will produce errors. To order them correctly we need first to sort them by name, and

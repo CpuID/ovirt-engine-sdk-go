@@ -60,19 +60,11 @@ public class GoNames {
     @ReservedWords(language = "go")
     private Set<String> reservedWords;
 
-    // The name and path of the module:
-    private String packageName = "ovirtsdk4";
+    // The path of the package:
     private String packagePath = "ovirtsdk4";
 
     // The version of the gem:
     private String version;
-
-    /**
-     * Get the package name.
-     */
-    public String getPackageName() {
-        return packageName;
-    }
 
     /**
      * Get the path of the package.
@@ -93,19 +85,6 @@ public class GoNames {
      */
     public void setVersion(String newVersion) {
         version = newVersion;
-    }
-
-    /**
-     * Set the package name.
-     */
-    public void setPackageName(String newPackage) {
-        // Save the name:
-        packageName = newPackage;
-
-        // Calculate the path:
-        packagePath = Arrays.stream(packageName.split("::"))
-            .map(String::toLowerCase)
-            .collect(joining("/"));
     }
 
     /**
@@ -221,9 +200,6 @@ public class GoNames {
         Name name = new Name(words);
         GoName result = new GoName();
         result.setClassName(getClassStyleName(name));
-
-        // Calculate the module name:
-        result.setPackageName(packageName);
 
         // Calculate the file name:
         StringBuilder fileName = new StringBuilder();

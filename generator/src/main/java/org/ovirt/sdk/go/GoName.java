@@ -21,17 +21,8 @@ package org.ovirt.sdk.go;
  * name of the file where it should be stored.
  */
 public class GoName {
-    private String packageName;
     private String className;
     private String fileName;
-
-    public String getPackageName() {
-        return packageName;
-    }
-
-    public void setPackageName(String newPackageName) {
-        packageName = newPackageName;
-    }
 
     public String getClassName() {
         return className;
@@ -52,8 +43,6 @@ public class GoName {
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
-        buffer.append(packageName);
-        buffer.append("::");
         buffer.append(className);
         return buffer.toString();
     }
