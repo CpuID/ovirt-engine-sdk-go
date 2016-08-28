@@ -16,7 +16,7 @@ instructions in the `README.adoc` file of the parent directory.
 To use the SDK import the package `github.com/CpuID/ovirt-engine-sdk-go/sdk/ovirtsdk4`. That will give you
 access to all the classes of the SDK, and in particular to the
 
-# TODO: review below here.
+*TODO: review below here, needs changing from ruby to golang stuff*
 
 {OvirtSDK4::Connection} class. This is the entry point of the SDK,
 and gives you access to the root of the tree of services of the API:
