@@ -1,5 +1,7 @@
 = oVirt Go SDK
 
+*Note: This is a work in progress. This may not be in a working state as yet.*
+
 == Introduction
 
 The oVirt Go SDK is a Go package that simplyfies access to the oVirt
