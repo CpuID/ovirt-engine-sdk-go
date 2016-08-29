@@ -158,7 +158,7 @@ public class ReadersGenerator implements GoGenerator {
             buffer.addLine(    "case rel");
             listLinks.forEach(link -> {
                 Name name = link.getName();
-                String property = goNames.getMemberStyleName(name);
+                String property = goNames.getFuncStyleName(name);
                 String rel = name.words().map(String::toLowerCase).collect(joining());
                 buffer.addLine("when '%1$s'", rel);
                 buffer.addLine(  "object.%1$s = list", property);
@@ -186,7 +186,7 @@ public class ReadersGenerator implements GoGenerator {
         Name name = member.getName();
         Type type = member.getType();
         if (type instanceof PrimitiveType || type instanceof EnumType) {
-            String property = goNames.getMemberStyleName(name);
+            String property = goNames.getFuncStyleName(name);
             String tag = schemaNames.getSchemaTagName(name);
             buffer.addLine("value = reader.get_attribute('%s')", tag);
             buffer.addLine("object.%1$s = value if not value.nil?", property);
@@ -222,7 +222,7 @@ public class ReadersGenerator implements GoGenerator {
     private void generateElementRead(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getMemberStyleName(name);
+        String property = goNames.getFuncStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
         String variable = String.format("object.%1$s", property);
         buffer.addLine("when '%1$s'", tag);

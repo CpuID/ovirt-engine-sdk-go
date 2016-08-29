@@ -39,3 +39,9 @@ sdk/spec/server.log
 sdk/tmp/
 settings.xml
 target/
+
+# Eclipse stuff
+.project
+.settings/
+.classpath
+generator/bin/

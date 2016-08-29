@@ -101,8 +101,8 @@ public class TypesGenerator implements GoGenerator {
 
         // Generate the forward declarations using the order calculated in the previous step:
         sorted.forEach(x -> {
-            generateClassDeclaration(x);
-            buffer.addLine("end");
+            generateTypeDeclaration(x);
+            buffer.addLine("}");
             buffer.addLine();
         });
 
@@ -111,8 +111,8 @@ public class TypesGenerator implements GoGenerator {
     }
 
     private void generateStruct(StructType type) {
-        // Begin class:
-        generateClassDeclaration(type);
+        // Begin strcut type:
+        generateTypeDeclaration(type);
         buffer.addLine();
 
         // Attributes and links:
@@ -133,7 +133,7 @@ public class TypesGenerator implements GoGenerator {
         members.stream().sorted().forEach(member -> {
             Type memberType = member.getType();
             Name memberName = member.getName();
-            String docName = goNames.getMemberStyleName(memberName);
+            String docName = goNames.getFuncStyleName(memberName);
             if (memberType instanceof PrimitiveType || memberType instanceof EnumType) {
                 buffer.addComment("@option opts :%1$s The value of attribute `%1$s`.", docName);
                 buffer.addComment();
@@ -151,14 +151,14 @@ public class TypesGenerator implements GoGenerator {
         buffer.addLine("def initialize(opts = {})");
         buffer.addLine(  "super(opts)");
         members.stream().sorted().forEach(member -> {
-            String memberName = goNames.getMemberStyleName(member.getName());
+            String memberName = goNames.getFuncStyleName(member.getName());
             buffer.addLine("self.%1$s = opts[:%1$s]", memberName);
         });
         buffer.addLine("end");
         buffer.addLine();
 
-        // End class:
-        buffer.addLine("end");
+        // End type:
+        buffer.addLine("}");
         buffer.addLine();
     }
 
@@ -170,7 +170,7 @@ public class TypesGenerator implements GoGenerator {
     private void generateGetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getMemberStyleName(name);
+        String property = goNames.getFuncStyleName(name);
         buffer.addComment();
         buffer.addComment("Returns the value of the `%1$s` attribute.", property);
         buffer.addComment();
@@ -183,7 +183,7 @@ public class TypesGenerator implements GoGenerator {
     private void generateSetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getMemberStyleName(name);
+        String property = goNames.getFuncStyleName(name);
         buffer.addComment();
         buffer.addComment("Sets the value of the `%1$s` attribute.", property);
         buffer.addComment();
@@ -248,15 +248,13 @@ public class TypesGenerator implements GoGenerator {
 
     private void generateEnumValue(EnumValue value) {
         String constantName = goNames.getConstantStyleName(value.getName());
-        String constantValue = goNames.getMemberStyleName(value.getName());
+        String constantValue = goNames.getFuncStyleName(value.getName());
         buffer.addLine("%s = '%s'.freeze", constantName, constantValue);
     }
 
-    private void generateClassDeclaration(StructType type) {
+    private void generateTypeDeclaration(StructType type) {
         GoName typeName = goNames.getTypeName(type);
-        Type base = type.getBase();
-        GoName baseName = base != null? goNames.getTypeName(base): goNames.getBaseStructName();
-        buffer.addLine("class %1$s < %2$s", typeName.getClassName(), baseName.getClassName());
+        buffer.addLine("type %1$s struct{", typeName.getClassName());
     }
 }
 

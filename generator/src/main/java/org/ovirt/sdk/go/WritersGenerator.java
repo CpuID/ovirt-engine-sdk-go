@@ -146,7 +146,7 @@ public class WritersGenerator implements GoGenerator {
     private void generateMemberWriteAsAttribute(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getMemberStyleName(name);
+        String property = goNames.getFuncStyleName(name);
         String attribute = schemaNames.getSchemaTagName(name);
         if (type instanceof PrimitiveType) {
             generateWritePrimitivePropertyAsAttribute((PrimitiveType) type, attribute, "object." + property);
@@ -176,7 +176,7 @@ public class WritersGenerator implements GoGenerator {
     private void generateMemberWriteAsElement(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getMemberStyleName(name);
+        String property = goNames.getFuncStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
         if (type instanceof PrimitiveType) {
             generateWritePrimitivePropertyAsElement((PrimitiveType) type, tag, "object." + property);
@@ -218,7 +218,7 @@ public class WritersGenerator implements GoGenerator {
     private void generateWriteStructPropertyAsElement(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getMemberStyleName(name);
+        String property = goNames.getFuncStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
         GoName writerName = goNames.getWriterName(type);
         buffer.addLine(
@@ -234,7 +234,7 @@ public class WritersGenerator implements GoGenerator {
         Type type = member.getType();
         ListType listType = (ListType) type;
         Type elementType = listType.getElementType();
-        String property = goNames.getMemberStyleName(name);
+        String property = goNames.getFuncStyleName(name);
         String pluralTag = schemaNames.getSchemaTagName(name);
         String singularTag = schemaNames.getSchemaTagName(names.getSingular(name));
         if (elementType instanceof PrimitiveType || elementType instanceof EnumType) {

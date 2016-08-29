@@ -199,7 +199,7 @@ public class GoNames {
         }
         Name name = new Name(words);
         GoName result = new GoName();
-        result.setClassName(getClassStyleName(name));
+        result.setClassName(getTypeStyleName(name));
 
         // Calculate the file name:
         StringBuilder fileName = new StringBuilder();
@@ -218,14 +218,15 @@ public class GoNames {
     /**
      * Returns a representation of the given name using the capitalization style typically used for Go classes.
      */
-    public String getClassStyleName(Name name) {
+    public String getTypeStyleName(Name name) {
         return name.words().map(words::capitalize).collect(joining());
     }
 
     /**
      * Returns a representation of the given name using the capitalization style typically used for Go members.
      */
-    public String getMemberStyleName(Name name) {
+    public String getFuncStyleName(Name name) {
+        // TODO: capitalized words, eg. VmService
         String result = name.words().map(String::toLowerCase).collect(joining("_"));
         if (reservedWords.contains(result)) {
             result += "_";
@@ -237,6 +238,7 @@ public class GoNames {
      * Returns a representation of the given name using the capitalization style typically used for Go constants.
      */
     public String getConstantStyleName(Name name) {
+        // TODO: review
         return name.words().map(String::toUpperCase).collect(joining("_"));
     }
 
@@ -244,6 +246,7 @@ public class GoNames {
      * Returns a representation of the given name using the capitalization style typically used for Go files.
      */
     public String getFileStyleName(Name name) {
+        // TODO: review
         return name.words().map(String::toLowerCase).collect(joining("_"));
     }
 }
