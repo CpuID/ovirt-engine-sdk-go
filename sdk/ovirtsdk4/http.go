@@ -28,7 +28,7 @@ import (
 )
 
 // This type represents an HTTP request.
-type ovirtSdk4HttpRequest struct {
+type httpRequest struct {
 	method  string
 	path    string
 	headers map[string]string
@@ -37,7 +37,7 @@ type ovirtSdk4HttpRequest struct {
 }
 
 // This type represents an HTTP response.
-type ovirtSdk4HttpResponse struct {
+type httpResponse struct {
 	body    string
 	code    int
 	headers map[string]string
@@ -48,7 +48,7 @@ type ovirtSdk4HttpResponse struct {
 // This type (and its attached functions) are responsible for managing an HTTP connection to the engine server.
 // It is intended as the entry point for the SDK, and it provides access to the `system` service and, from there,
 // to the rest of the services provided by the API.
-type OvirtSdk4HttpConnection struct {
+type HttpConnection struct {
 	url      url.URL
 	username string
 	password string
@@ -63,7 +63,7 @@ type OvirtSdk4HttpConnection struct {
 }
 
 // Creates a new connection to the API server.
-func (c *OvirtSdk4HttpConnection) Setup(input_url string, username string, password string, token string, insecure bool, ca_file string, kerberos bool, timeout uint8, compress bool) error {
+func (c *HttpConnection) Setup(input_url string, username string, password string, token string, insecure bool, ca_file string, kerberos bool, timeout uint8, compress bool) error {
 	// Get the values of the parameters and assign default values:
 	c.username = username
 	c.password = password
@@ -128,16 +128,24 @@ func (c *OvirtSdk4HttpConnection) Setup(input_url string, username string, passw
 }
 
 // Returns the base URL of this connection.
-func (c *OvirtSdk4HttpConnection) Url() string {
+func (c *HttpConnection) Url() string {
 	return c.url
 }
 
-// TODO: do we need these?
-// func SystemService
-// func Service
+// Returns a reference to the root of the services tree.
+func (c *HttpConnection) SystemService() *SystemService {
+	// TODO: implement
+}
+
+// Returns a reference to the service corresponding to the given path. For example, if the `path` parameter
+// is `vms/123/diskattachments` then it will return a reference to the service that manages the disk
+// attachments for the virtual machine with identifier `123`.
+func (c *HttpConnection) Service(path string) *Service {
+	// TODO: implement
+}
 
 // Sends an HTTP request and waits for the response.
-func (c *OvirtSdk4HttpConnection) send(r *OvirtSdk4HttpRequest) (*OvirtSdk4HttpResponse, error) {
+func (c *HttpConnection) send(r *OvirtSdk4HttpRequest) (*OvirtSdk4HttpResponse, error) {
 	var result OvirtSdk4HttpResponse
 
 	// Check if we already have an SSO access token:
@@ -188,13 +196,36 @@ func (c *OvirtSdk4HttpConnection) send(r *OvirtSdk4HttpRequest) (*OvirtSdk4HttpR
 }
 
 // Obtains the access token from SSO to be used for bearer authentication.
-func (c *OvirtSdk4HttpConnection) getAccessToken() {
-	// TODO: implement
+func (c *HttpConnection) getAccessToken() (string, error) {
+	// Build the URL and parameters required for the request:
+	url, parameters := c.buildSsoAuthRequest()
+
+	// Send the response and wait for the request:
+	response := c.getSsoResponse(url, parameters)
+
+	// Top level array already handled in getSsoResponse() generically.
+
+	if len(response.ssoError) > 0 {
+		return "", fmt.Errorf("Error during SSO authentication %s: %s", response.ssoErrorCode, response.ssoError)
+	}
+
+	return response.accessToken, nil
 }
 
 // Revoke the SSO access token.
-func (c *OvirtSdk4HttpConnection) revokeAccessToken() {
-	// TODO: implement
+func (c *HttpConnection) revokeAccessToken() error {
+	// Build the URL and parameters required for the request:
+	url, parameters := c.buildSsoRevokeRequest()
+
+	// Send the response and wait for the request:
+	response := c.getSsoResponse(url, parameters)
+
+	// Top level array already handled in getSsoResponse() generically.
+
+	if len(response.ssoError) > 0 {
+		return fmt.Errorf("Error during SSO revoke %s: %s", response.ssoErrorCode, response.ssoError)
+	}
+	return nil
 }
 
 type ssoResponseJsonParent struct {
@@ -202,12 +233,13 @@ type ssoResponseJsonParent struct {
 }
 
 type ssoResponseJson struct {
-	accessToken string `json:"access_token"`
-	ssoError    string `json:"error"`
+	accessToken  string `json:"access_token"`
+	ssoError     string `json:"error"`
+	ssoErrorCode string `json:"error_code"`
 }
 
 // Execute a get request to the SSO server and return the response.
-func (c *OvirtSdk4HttpConnection) getSsoResponse(input_url string, parameters map[string]string) (ssoResponseJson, error) {
+func (c *HttpConnection) getSsoResponse(input_url string, parameters map[string]string) (ssoResponseJson, error) {
 	// Create the HTTP client handle for SSO:
 	client = &http.Client{
 		Timeout: time.Duration(c.timeout),
@@ -290,7 +322,7 @@ func (c *OvirtSdk4HttpConnection) getSsoResponse(input_url string, parameters ma
 }
 
 // Builds a the URL and parameters to acquire the access token from SSO.
-func (c *OvirtSdk4HttpConnection) buildSsoAuthRequest() (string, map[string]string) {
+func (c *HttpConnection) buildSsoAuthRequest() (string, map[string]string) {
 	// Compute the entry point and the parameters:
 	parameters := map[string]string{
 		"scope": "ovirt-app-api",
@@ -318,7 +350,7 @@ func (c *OvirtSdk4HttpConnection) buildSsoAuthRequest() (string, map[string]stri
 // Builds a the URL and parameters to revoke the SSO access token.
 // string = the URL of the SSO service
 // map = hash containing the parameters required to perform the revoke
-func (c *OvirtSdk4HttpConnection) buildSsoRevokeRequest() (string, map[string]string) {
+func (c *HttpConnection) buildSsoRevokeRequest() (string, map[string]string) {
 	// Compute the parameters:
 	parameters := map[string]string{
 		"scope": "",
@@ -335,7 +367,7 @@ func (c *OvirtSdk4HttpConnection) buildSsoRevokeRequest() (string, map[string]st
 
 // Tests the connectivity with the server. If connectivity works correctly it returns a nil error. If there is any
 // connectivity problem it will return an error containing the reason as the message.
-func (c *OvirtSdk4HttpConnection) Test() error {
+func (c *HttpConnection) Test() error {
 	return c.SystemService.Get()
 }
 
@@ -343,23 +375,29 @@ func (c *OvirtSdk4HttpConnection) Test() error {
 // call this method, as authentication is performed automatically when needed. But in some situations it
 // may be useful to perform authentication explicitly, and then use the obtained token to create other
 // connections, using the `token` parameter of the constructor instead of the user name and password.
-func (c *OvirtSdk4HttpConnection) Authenticate() {
+func (c *HttpConnection) Authenticate() {
 	c.token = c.getAccessToken()
 }
 
-// TODO: do we need these?
-// func isLink
-// func followLink
+// Indicates if the given object is a link. An object is a link if it has an `href` attribute.
+func (c *HttpConnection) IsLink(object string) bool {
+	// TODO: implement
+}
+
+// Follows the `href` attribute of the given object, retrieves the target object and returns it.
+func (c *HttpConnection) FollowLink(object string) error {
+	// TODO: implement
+}
 
 // Releases the resources used by this connection.
-func (c *OvirtSdk4HttpConnection) Close() {
+func (c *HttpConnection) Close() {
 	if len(token) > 0 {
 		c.revokeAccessToken()
 	}
 }
 
 // Builds a request URL from a path, and the set of query parameters.
-func (c *OvirtSdk4HttpConnection) BuildUrl(path string, query map[string]string) string {
+func (c *HttpConnection) BuildUrl(path string, query map[string]string) string {
 	url = fmt.Sprintf("%s%s", c.url.String(), path)
 	if len(query) > 0 {
 		var values url.Values
