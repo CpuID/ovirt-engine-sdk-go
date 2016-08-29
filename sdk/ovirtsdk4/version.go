@@ -15,3 +15,5 @@
 //
 
 package ovirtsdk4
+
+var SdkVersion = "4.1.0a0"
