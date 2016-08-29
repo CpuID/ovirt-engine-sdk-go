@@ -189,21 +189,25 @@ func (c *OvirtSdk4HttpConnection) send(r *OvirtSdk4HttpRequest) (*OvirtSdk4HttpR
 
 // Obtains the access token from SSO to be used for bearer authentication.
 func (c *OvirtSdk4HttpConnection) getAccessToken() {
-
+	// TODO: implement
 }
 
 // Revoke the SSO access token.
 func (c *OvirtSdk4HttpConnection) revokeAccessToken() {
+	// TODO: implement
+}
 
+type ssoResponseJsonParent struct {
+	children []ssoResponseJson
 }
 
 type ssoResponseJson struct {
-	AccessToken string `json:"access_token"`
-	Error       string `json:"error"`
+	accessToken string `json:"access_token"`
+	ssoError    string `json:"error"`
 }
 
 // Execute a get request to the SSO server and return the response.
-func (c *OvirtSdk4HttpConnection) getSsoResponse(input_url string, parameters map[string]string) error {
+func (c *OvirtSdk4HttpConnection) getSsoResponse(input_url string, parameters map[string]string) (ssoResponseJson, error) {
 	// Create the HTTP client handle for SSO:
 	client = &http.Client{
 		Timeout: time.Duration(c.timeout),
@@ -217,16 +221,16 @@ func (c *OvirtSdk4HttpConnection) getSsoResponse(input_url string, parameters ma
 		if len(c.ca_file) > 0 {
 			// Check if the CA File specified exists.
 			if _, err := os.Stat(c.caFile); os.IsNotExist(err) {
-				return fmt.Errorf("The CA File '%s' doesn't exist.", c.caFile)
+				return ssoResponseJson{}, fmt.Errorf("The CA File '%s' doesn't exist.", c.caFile)
 			}
 			pool := x509.NewCertPool()
 			ca_certs, err := ioutil.readAll(c.caFile)
 			if err != nil {
-				return err
+				return ssoResponseJson{}, err
 			}
 			ok = pool.AppendCertsFromPEM([]byte{ca_certs})
 			if ok == false {
-				return fmt.Errorf("Failed to parse CA Certificate in file '%s'", c.caFile)
+				return ssoResponseJson{}, fmt.Errorf("Failed to parse CA Certificate in file '%s'", c.caFile)
 			}
 			client.TLSClientConfig.RootCAs = pool
 		}
@@ -257,18 +261,58 @@ func (c *OvirtSdk4HttpConnection) getSsoResponse(input_url string, parameters ma
 	// Send the request and wait for the response:
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return ssoResponseJson{}, err
 	}
 	defer resp.Body.Close()
 
 	// Parse and return the JSON response:
-
-	// TODO: implement
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return ssoResponseJson{}, err
+	}
+	var json1 ssoResponseJson
+	json1, err1 := json.Unmarshal(body, &result1)
+	if err1 != nil {
+		// Maybe it's array encapsulated, try the other approach.
+		var json2 ssoResponseJsonParent
+		json2, err2 := json.Unmarshal(body, &result2)
+		if err2 != nil {
+			return fmt.Errorf("Errors for both JSON unmarshal methods (array/non-array) for SSO response: %s / %s", err1.Error(), err2.Error())
+		}
+		if len(json2) == 0 {
+			return errors.New("SSO response is a zero length array.")
+		}
+		json1.accessToken = json2.children[0].accessToken
+		json1.ssoError = json2.children[0].ssoError
+		return json1, nil
+	}
+	return json1, nil
 }
 
 // Builds a the URL and parameters to acquire the access token from SSO.
-func (c *OvirtSdk4HttpConnection) buildSsoAuthRequest() {
+func (c *OvirtSdk4HttpConnection) buildSsoAuthRequest() (string, map[string]string) {
+	// Compute the entry point and the parameters:
+	parameters := map[string]string{
+		"scope": "ovirt-app-api",
+	}
 
+	var entry_point string
+	if c.kerberos == true {
+		entry_point = "token-http-auth"
+		parameters["grant_type"] = "urn:ovirt:params:oauth:grant-type:http"
+	} else {
+		entry_point = "token"
+		parameters["grant_type"] = "password"
+		parameters["username"] = c.username
+		parameters["password"] = c.password
+	}
+
+	// Compute the URL:
+	sso_url := c.url
+	sso_url.Path = fmt.Sprintf("/ovirt-engine/sso/oauth/%s", entry_point)
+
+	// Return the URL and the parameters:
+	return sso_url.String(), parameters
 }
 
 // Builds a the URL and parameters to revoke the SSO access token.
@@ -283,7 +327,7 @@ func (c *OvirtSdk4HttpConnection) buildSsoRevokeRequest() (string, map[string]st
 
 	// Compute the URL:
 	sso_url := c.url
-	sso_url.path = "/ovirt-engine/services/sso-logout"
+	sso_url.Path = "/ovirt-engine/services/sso-logout"
 
 	// Return the URL and the parameters:
 	return sso_url.String(), parameters
