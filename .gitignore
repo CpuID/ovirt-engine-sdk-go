@@ -34,11 +34,14 @@ _testmain.go
 exported-artifacts/
 sdk/doc/
 sdk/pkg/
-sdk/spec/access.log
-sdk/spec/server.log
-sdk/tmp/
 settings.xml
 target/
+
+# Go codegen outputs
+sdk/ovirtsdk4/readers.go
+sdk/ovirtsdk4/services.go
+sdk/ovirtsdk4/types.go
+sdk/ovirtsdk4/writers.go
 
 # Eclipse stuff
 .project
