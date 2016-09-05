@@ -54,21 +54,8 @@ public class ReadersGenerator implements GoGenerator {
     }
 
     public void generate(Model model) {
-        // Calculate the file name:
-        String fileName = goNames.getPackagePath() + "/readers";
-        buffer = new GoBuffer();
-        buffer.setFileName(fileName);
-
         // Generate the source:
         generateSource(model);
-
-        // Write the file:
-        try {
-            buffer.write(out);
-        }
-        catch (IOException exception) {
-            throw new IllegalStateException("Error writing readers file \"" + fileName + "\"", exception);
-        }
     }
 
     private void generateSource(Model model) {
@@ -81,9 +68,16 @@ public class ReadersGenerator implements GoGenerator {
     }
 
     private void generateReader(StructType type) {
+        GoName readerName = goNames.getReaderName(type);
+        
+        // Calculate the file name:
+        // TODO: camelcase to snakecase on file basename
+        String fileName = goNames.getPackagePath() + "/readers/" + readerName.getClassName();
+        buffer = new GoBuffer();
+        buffer.setFileName(fileName);
+
         // Begin class:
         GoName typeName = goNames.getTypeName(type);
-        GoName readerName = goNames.getReaderName(type);
         GoName baseName = goNames.getBaseReaderName();
         buffer.addLine("class %1$s < %2$s # :nodoc:", readerName.getClassName(), baseName.getClassName());
         buffer.addLine();
@@ -172,9 +166,13 @@ public class ReadersGenerator implements GoGenerator {
             buffer.addLine();
         }
 
-        // End class:
-        buffer.addLine("end");
-        buffer.addLine();
+        // Write the file:
+        try {
+            buffer.write(out);
+        }
+        catch (IOException exception) {
+            throw new IllegalStateException("Error writing readers file \"" + fileName + "\"", exception);
+        }
     }
 
     private void generateAttributesRead(StructType type) {

@@ -46,6 +46,8 @@ sdk/types/*.go
 !sdk/types/type.go
 sdk/writers/*.go
 !sdk/writers/writer.go
+# TODO: remove at some point
+!sdk/services/TEMPLATE_affinity_group_service.go
 
 # Eclipse stuff
 .project

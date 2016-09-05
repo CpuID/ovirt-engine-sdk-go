@@ -56,7 +56,7 @@ public class TypesGenerator implements GoGenerator {
 
     public void generate(Model model) {
         // Calculate the file name:
-        String fileName = goNames.getPackagePath() + "/types";
+        String fileName = goNames.getPackagePath() + "/types/types";
         buffer = new GoBuffer();
         buffer.setFileName(fileName);
 
@@ -74,11 +74,6 @@ public class TypesGenerator implements GoGenerator {
     }
 
     private void generateStructs(Model model) {
-        // Begin module:
-        buffer.addComment();
-        buffer.addComment("These forward declarations are required in order to avoid circular dependencies.");
-        buffer.addComment();
-
         // The declarations of the types need to appear in inheritance order, otherwise some symbols won't be
         // defined and that will produce errors. To order them correctly we need first to sort them by name, and
         // then sort again so that bases are before extensions.
@@ -98,13 +93,6 @@ public class TypesGenerator implements GoGenerator {
                 pending.addLast(current);
             }
         }
-
-        // Generate the forward declarations using the order calculated in the previous step:
-        sorted.forEach(x -> {
-            generateTypeDeclaration(x);
-            buffer.addLine("}");
-            buffer.addLine();
-        });
 
         // Generate the complete declarations, using the same order:
         sorted.forEach(this::generateStruct);

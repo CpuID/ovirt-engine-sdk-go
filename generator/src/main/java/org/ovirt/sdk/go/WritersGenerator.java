@@ -52,21 +52,8 @@ public class WritersGenerator implements GoGenerator {
     }
 
     public void generate(Model model) {
-        // Calculate the file name:
-        String fileName = goNames.getPackagePath() + "/writers";
-        buffer = new GoBuffer();
-        buffer.setFileName(fileName);
-
         // Generate the source:
         generateSource(model);
-
-        // Write the file:
-        try {
-            buffer.write(out);
-        }
-        catch (IOException exception) {
-            throw new IllegalStateException("Error writing writers file \"" + fileName + "\"", exception);
-        }
     }
 
     private void generateSource(Model model) {
@@ -79,8 +66,15 @@ public class WritersGenerator implements GoGenerator {
     }
 
     private void generateWriter(StructType type) {
-        // Begin class:
         GoName writerName = goNames.getWriterName(type);
+
+        // Calculate the file name:
+        // TODO: camelcase to snakecase on file basename
+        String fileName = goNames.getPackagePath() + "/writers/" + writerName.getClassName();
+        buffer = new GoBuffer();
+        buffer.setFileName(fileName);
+
+        // Begin class:
         GoName baseName = goNames.getBaseWriterName();
         buffer.addLine("class %1$s < %2$s # :nodoc:", writerName.getClassName(), baseName.getClassName());
         buffer.addLine();
@@ -116,9 +110,13 @@ public class WritersGenerator implements GoGenerator {
         buffer.addLine("end");
         buffer.addLine();
 
-        // End class:
-        buffer.addLine("end");
-        buffer.addLine();
+        // Write the file:
+        try {
+            buffer.write(out);
+        }
+        catch (IOException exception) {
+            throw new IllegalStateException("Error writing writers file \"" + fileName + "\"", exception);
+        }
     }
 
     private void generateMembersWrite(StructType type) {
