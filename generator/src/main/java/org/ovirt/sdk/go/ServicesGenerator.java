@@ -111,33 +111,19 @@ public class ServicesGenerator implements GoGenerator {
     private void generateService(Service service) {
         // Begin struct type:
         generateTypeDeclaration(service);
+        buffer.addLine("	connection *ovirt_http.Connection");
+        buffer.addLine("	path string");
         buffer.addLine("}");
         buffer.addLine();
 
         // Generate the constructor:
-        // TODO: fix up these comments to suit golang usage
-        /*
-        buffer.addComment();
         buffer.addComment("Creates a new implementation of the service.");
-        buffer.addComment();
-        buffer.addComment("@param connection [Connection] The connection to be used by this service.");
-        buffer.addComment();
-        buffer.addComment("@param path [String] The relative path of this service, for example `vms/123/disks`.");
-        buffer.addComment();
-        buffer.addComment("@api private");
-        buffer.addComment();
-        */
-        // TODO: review
-        // We don't have initializers, these are types not classes.
-        // We can enable one if required.
-        /*
+        GoName serviceName = goNames.getServiceName(service);
+        buffer.addLine("func New%1$s(connection *ovirt_http.Connection, path string) *%1$s {", serviceName.getClassName(), serviceName.getClassName());
+        buffer.addLine("  c.connection = connection");
+        buffer.addLine("  c.path = path");
+        buffer.addLine("}");
         buffer.addLine();
-        buffer.addLine("def initialize(connection, path)");
-        buffer.addLine(  "@connection = connection");
-        buffer.addLine(  "@path = path");
-        buffer.addLine("end");
-        buffer.addLine();
-        */
 
         // Generate the methods and locators:
         service.methods().sorted().forEach(this::generateMethod);
@@ -146,10 +132,6 @@ public class ServicesGenerator implements GoGenerator {
 
         // Generate other methods that don't correspond to model methods or locators:
         generateToS(service);
-
-        // End type:
-        buffer.addLine("}");
-        buffer.addLine();
     }
 
     private void generateMethod(Method method) {
