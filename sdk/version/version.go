@@ -14,6 +14,6 @@
 // limitations under the License.
 //
 
-package ovirtsdk4
+package version
 
 var SdkVersion = "4.1.0a0"
