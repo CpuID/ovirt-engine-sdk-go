@@ -1,4 +1,4 @@
-package ovirtsdk4
+package slice
 
 import ()
 

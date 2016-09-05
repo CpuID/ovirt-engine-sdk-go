@@ -29,6 +29,8 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/CpuID/ovirt-engine-sdk-go/sdk/slice"
 )
 
 // This type represents an HTTP request.
@@ -159,7 +161,7 @@ func (c *Connection) send(r *request) (*response, error) {
 	use_url := c.buildUrl(r.path, r.query)
 
 	// Validate the method selected:
-	if stringInSlice(r.method, []string{"DELETE", "GET", "PUT", "HEAD", "POST"}) == false {
+	if slice.stringInSlice(r.method, []string{"DELETE", "GET", "PUT", "HEAD", "POST"}) == false {
 		return &result, fmt.Errorf("The HTTP method '%s' is invalid, we expected one of DELETE/GET/PUT/HEAD/POST.", r.method)
 	}
 
