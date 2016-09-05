@@ -16,19 +16,21 @@
 
 // Credit: https://github.com/oVirt/ovirt-engine-sdk-ruby/blob/master/sdk/lib/ovirtsdk4/http.rb
 
-package ovirtsdk4
+package http
 
 import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 // This type represents an HTTP request.
-type httpRequest struct {
+type request struct {
 	method  string
 	path    string
 	headers map[string]string
@@ -37,7 +39,7 @@ type httpRequest struct {
 }
 
 // This type represents an HTTP response.
-type httpResponse struct {
+type response struct {
 	body    string
 	code    int
 	headers map[string]string
@@ -48,7 +50,7 @@ type httpResponse struct {
 // This type (and its attached functions) are responsible for managing an HTTP connection to the engine server.
 // It is intended as the entry point for the SDK, and it provides access to the `system` service and, from there,
 // to the rest of the services provided by the API.
-type HttpConnection struct {
+type Connection struct {
 	url      url.URL
 	username string
 	password string
@@ -63,7 +65,7 @@ type HttpConnection struct {
 }
 
 // Creates a new connection to the API server.
-func (c *HttpConnection) Setup(input_url string, username string, password string, token string, insecure bool, ca_file string, kerberos bool, timeout uint8, compress bool) error {
+func (c *Connection) Setup(input_url string, username string, password string, token string, insecure bool, ca_file string, kerberos bool, timeout uint8, compress bool) error {
 	// Get the values of the parameters and assign default values:
 	c.username = username
 	c.password = password
@@ -84,10 +86,11 @@ func (c *HttpConnection) Setup(input_url string, username string, password strin
 	}
 
 	// Save the URL:
-	c.url = url.Parse(input_url)
+	use_url, err := url.Parse(input_url)
 	if err != nil {
 		return err
 	}
+	c.url = *use_url
 
 	// Create the HTTP client:
 	var disable_compress bool
@@ -128,25 +131,25 @@ func (c *HttpConnection) Setup(input_url string, username string, password strin
 }
 
 // Returns the base URL of this connection.
-func (c *HttpConnection) Url() string {
+func (c *Connection) Url() string {
 	return c.url
 }
 
 // Returns a reference to the root of the services tree.
-func (c *HttpConnection) SystemService() *SystemService {
+func (c *Connection) SystemService() *SystemService {
 	// TODO: implement
 }
 
 // Returns a reference to the service corresponding to the given path. For example, if the `path` parameter
 // is `vms/123/diskattachments` then it will return a reference to the service that manages the disk
 // attachments for the virtual machine with identifier `123`.
-func (c *HttpConnection) Service(path string) *Service {
+func (c *Connection) Service(path string) *Service {
 	// TODO: implement
 }
 
 // Sends an HTTP request and waits for the response.
-func (c *HttpConnection) send(r *OvirtSdk4HttpRequest) (*OvirtSdk4HttpResponse, error) {
-	var result OvirtSdk4HttpResponse
+func (c *Connection) send(r *request) (*response, error) {
+	var result response
 
 	// Check if we already have an SSO access token:
 	c.token = c.getAccessToken()
@@ -196,7 +199,7 @@ func (c *HttpConnection) send(r *OvirtSdk4HttpRequest) (*OvirtSdk4HttpResponse, 
 }
 
 // Obtains the access token from SSO to be used for bearer authentication.
-func (c *HttpConnection) getAccessToken() (string, error) {
+func (c *Connection) getAccessToken() (string, error) {
 	// Build the URL and parameters required for the request:
 	url, parameters := c.buildSsoAuthRequest()
 
@@ -213,7 +216,7 @@ func (c *HttpConnection) getAccessToken() (string, error) {
 }
 
 // Revoke the SSO access token.
-func (c *HttpConnection) revokeAccessToken() error {
+func (c *Connection) revokeAccessToken() error {
 	// Build the URL and parameters required for the request:
 	url, parameters := c.buildSsoRevokeRequest()
 
@@ -239,7 +242,7 @@ type ssoResponseJson struct {
 }
 
 // Execute a get request to the SSO server and return the response.
-func (c *HttpConnection) getSsoResponse(input_url string, parameters map[string]string) (ssoResponseJson, error) {
+func (c *Connection) getSsoResponse(input_url string, parameters map[string]string) (ssoResponseJson, error) {
 	// Create the HTTP client handle for SSO:
 	client = &http.Client{
 		Timeout: time.Duration(c.timeout),
@@ -322,7 +325,7 @@ func (c *HttpConnection) getSsoResponse(input_url string, parameters map[string]
 }
 
 // Builds a the URL and parameters to acquire the access token from SSO.
-func (c *HttpConnection) buildSsoAuthRequest() (string, map[string]string) {
+func (c *Connection) buildSsoAuthRequest() (string, map[string]string) {
 	// Compute the entry point and the parameters:
 	parameters := map[string]string{
 		"scope": "ovirt-app-api",
@@ -350,7 +353,7 @@ func (c *HttpConnection) buildSsoAuthRequest() (string, map[string]string) {
 // Builds a the URL and parameters to revoke the SSO access token.
 // string = the URL of the SSO service
 // map = hash containing the parameters required to perform the revoke
-func (c *HttpConnection) buildSsoRevokeRequest() (string, map[string]string) {
+func (c *Connection) buildSsoRevokeRequest() (string, map[string]string) {
 	// Compute the parameters:
 	parameters := map[string]string{
 		"scope": "",
@@ -367,7 +370,7 @@ func (c *HttpConnection) buildSsoRevokeRequest() (string, map[string]string) {
 
 // Tests the connectivity with the server. If connectivity works correctly it returns a nil error. If there is any
 // connectivity problem it will return an error containing the reason as the message.
-func (c *HttpConnection) Test() error {
+func (c *Connection) Test() error {
 	return c.SystemService.Get()
 }
 
@@ -375,29 +378,29 @@ func (c *HttpConnection) Test() error {
 // call this method, as authentication is performed automatically when needed. But in some situations it
 // may be useful to perform authentication explicitly, and then use the obtained token to create other
 // connections, using the `token` parameter of the constructor instead of the user name and password.
-func (c *HttpConnection) Authenticate() {
+func (c *Connection) Authenticate() {
 	c.token = c.getAccessToken()
 }
 
 // Indicates if the given object is a link. An object is a link if it has an `href` attribute.
-func (c *HttpConnection) IsLink(object string) bool {
+func (c *Connection) IsLink(object string) bool {
 	// TODO: implement
 }
 
 // Follows the `href` attribute of the given object, retrieves the target object and returns it.
-func (c *HttpConnection) FollowLink(object string) error {
+func (c *Connection) FollowLink(object string) error {
 	// TODO: implement
 }
 
 // Releases the resources used by this connection.
-func (c *HttpConnection) Close() {
+func (c *Connection) Close() {
 	if len(token) > 0 {
 		c.revokeAccessToken()
 	}
 }
 
 // Builds a request URL from a path, and the set of query parameters.
-func (c *HttpConnection) BuildUrl(path string, query map[string]string) string {
+func (c *Connection) BuildUrl(path string, query map[string]string) string {
 	url = fmt.Sprintf("%s%s", c.url.String(), path)
 	if len(query) > 0 {
 		var values url.Values
