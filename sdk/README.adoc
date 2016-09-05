@@ -13,32 +13,53 @@ instructions in the `README.adoc` file of the parent directory.
 
 == Usage
 
-To use the SDK import the package `github.com/CpuID/ovirt-engine-sdk-go/sdk/ovirtsdk4`. That will give you
-access to all the classes of the SDK, and in particular to the
+To use the SDK import the `http` and `services` packages:
 
-*TODO: review below here, needs changing from ruby to golang stuff*
+```go
+import (
+  ovirt_http "github.com/CpuID/ovirt-engine-sdk-go/sdk/http"
+  "github.com/CpuID/ovirt-engine-sdk-go/sdk/services"
+)
+```
 
-{OvirtSDK4::Connection} class. This is the entry point of the SDK,
-and gives you access to the root of the tree of services of the API:
+That will give you access to all the `services` types and functions of the SDK. If you need lower level access, you can also import:
 
-[source,ruby]
-----
-require 'ovirtsdk4'
+```go
+import (
+  "github.com/CpuID/ovirt-engine-sdk-go/sdk/readers"
+  "github.com/CpuID/ovirt-engine-sdk-go/sdk/writers"
+  "github.com/CpuID/ovirt-engine-sdk-go/sdk/types"
+)
+```
 
-# Create a connection to the server:
-connection = OvirtSDK4::Connection.new({
-  :url => 'https://engine.example.com/ovirt-engine/api',
-  :username => 'admin@internal',
-  :password => '...',
-  :ca_file => 'ca.pem',
-})
+A basic example to make a connection and perform an operation:
 
-# Get the reference to the system service:
-system_service = connection.system_service
+```go
+import (
+  ovirt_http "github.com/CpuID/ovirt-engine-sdk-go/sdk/http"
+  "github.com/CpuID/ovirt-engine-sdk-go/sdk/services"
+)
 
-# Always remember to close the connection when finished:
-connection.close
-----
+// TODO: make some of these optional?
+connection = new(ovirt_http.Connection)
+connection.Setup(
+  "https://engine.example.com/ovirt-engine/api",
+  "admin@internal",
+  "password",
+  "",
+  false,
+  "ca.pem",
+  false,
+  uint8(10),
+  true
+)
+if err != nil {
+  panic(err)
+}
+
+// TODO: finish me
+system_service := connection.SystemService
+```
 
 The `ca.pem` file is required when connecting to a server protected
 with TLS. In an usual oVirt installation it will be in
