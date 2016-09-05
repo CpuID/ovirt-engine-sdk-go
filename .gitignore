@@ -38,10 +38,14 @@ settings.xml
 target/
 
 # Go codegen outputs
-sdk/readers/*/*.go
-sdk/services/*/*.go
-sdk/types/*/*.go
-sdk/writers/*/*.go
+sdk/readers/*.go
+!sdk/readers/reader.go
+sdk/services/*.go
+!sdk/services/service.go
+sdk/types/*.go
+!sdk/types/type.go
+sdk/writers/*.go
+!sdk/writers/writer.go
 
 # Eclipse stuff
 .project
