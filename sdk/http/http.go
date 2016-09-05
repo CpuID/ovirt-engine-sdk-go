@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/CpuID/ovirt-engine-sdk-go/sdk/slice"
+	"github.com/CpuID/ovirt-engine-sdk-go/sdk/version"
 )
 
 // This type represents an HTTP request.
@@ -175,7 +176,7 @@ func (c *Connection) send(r *request) (*response, error) {
 	for k1, v1 := range r.headers {
 		req.Header.Add(k1, v1)
 	}
-	req.Header.Add("User-Agent", fmt.Sprintf("GoSDK/%s", SdkVersion))
+	req.Header.Add("User-Agent", fmt.Sprintf("GoSDK/%s", version.SdkVersion))
 	req.Header.Add("Version", "4")
 	req.Header.Add("Content-Type", "application/xml")
 	req.Header.Add("Accept", "application/xml")
@@ -291,7 +292,7 @@ func (c *Connection) getSsoResponse(input_url string, parameters map[string]stri
 	}
 
 	// Add request headers:
-	req.Header.Add("User-Agent", fmt.Sprintf("GoSDK/%s", SdkVersion))
+	req.Header.Add("User-Agent", fmt.Sprintf("GoSDK/%s", version.SdkVersion))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Accept", "application/json")
 
