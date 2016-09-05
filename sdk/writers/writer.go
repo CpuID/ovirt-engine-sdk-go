@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ovirtsdk4
+package writers
 
 import (
 	"time"
@@ -28,48 +28,48 @@ type XmlWriter interface{}
 //
 
 // Writes an element with the given name and string value.
-func writerWriteString(writer *XmlWriter, name string, value string) {
+func WriteString(writer *XmlWriter, name string, value string) {
 	// TODO: implement
 }
 
 // Converts the given boolean value to an string.
-func writerRenderBoolean(value bool) string {
+func RenderBoolean(value bool) string {
 	// TODO: implement
 }
 
 // Writes an element with the given name and boolean value.
-func writerWriteBoolean(writer *XmlWriter, name string, value string) {
+func WriteBoolean(writer *XmlWriter, name string, value string) {
 	// TODO: implement
 }
 
 // Converts the given integer value to an string.
-func writerRenderInteger(value int) string {
+func RenderInteger(value int) string {
 	// TODO: implement
 }
 
 // Writes an element with the given name and integer value.
-func writerWriteInteger(writer *XmlWriter, name string, value int) {
+func WriteInteger(writer *XmlWriter, name string, value int) {
 	// TODO: implement
 }
 
 // Converts the given decimal value to an string.
 // TODO: int or float?
-func writerRenderDecimal(value int) string {
+func RenderDecimal(value int) string {
 	// TODO: implement
 }
 
 // Writes an element with the given name and decimal value.
 // TODO: int or float?
-func writerWriteDecimal(writer *XmlWriter, name string, value int) {
+func WriteDecimal(writer *XmlWriter, name string, value int) {
 	// TODO: implement
 }
 
 // Converts the given date value to an string.
-func writerRenderDate(value *time.Time) string {
+func RenderDate(value *time.Time) string {
 	// TODO: implement
 }
 
 // Writes an element with the given name and date value.
-func writerWriteDate(writer *XmlWriter, name string, value time.Time) {
+func WriteDate(writer *XmlWriter, name string, value time.Time) {
 	// TODO: implement
 }

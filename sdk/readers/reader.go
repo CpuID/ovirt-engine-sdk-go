@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ovirtsdk4
+package readers
 
 import (
 	"time"
@@ -28,79 +28,79 @@ type XmlReader interface{}
 //
 
 // Reads a string value, assuming that the cursor is positioned at the start element that contains the value.
-func readerReadString(reader *XmlReader) string {
+func ReadString(reader *XmlReader) string {
 	// TODO: implement
 }
 
 // Reads a list of string values, assuming that the cursor is positioned at the start of the element that contains
 // the first value.
-func readerReadStrings(reader *XmlReader) []string {
+func ReadStrings(reader *XmlReader) []string {
 	// TODO: implement
 }
 
 // Converts the given text to a boolean value.
-func readerParseBoolean(text *string) bool {
+func ParseBoolean(text *string) bool {
 	// TODO: implement
 }
 
 // Reads a boolean value, assuming that the cursor is positioned at the start element that contains the value.
-func readerReadBoolean(reader *XmlReader) bool {
+func ReadBoolean(reader *XmlReader) bool {
 	// TODO: implement
 }
 
 // Reads a list of boolean values, assuming that the cursor is positioned at the start element that contains
 // the values.
-func readerReadBooleans(reader *XmlReader) []bool {
+func ReadBooleans(reader *XmlReader) []bool {
 	// TODO: implement
 }
 
 // Converts the given text to an integer value.
-func readerParseInteger(text *string) int {
+func ParseInteger(text *string) int {
 	// TODO: implement
 }
 
 // Reads an integer value, assuming that the cursor is positioned at the start element that contains the value.
-func readerReadInteger(reader *XmlReader) int {
+func ReadInteger(reader *XmlReader) int {
 	// TODO: implement
 }
 
 // Reads a list of integer values, assuming that the cursor is positioned at the start element that contains the
 // values.
-func readerReadIntegers(reader *XmlReader) []int {
+func ReadIntegers(reader *XmlReader) []int {
 	// TODO: implement
 }
 
 // Converts the given text to a decimal value.
 // TODO: int or float?
-func readerParseDecimal(text *string) int {
+func ParseDecimal(text *string) int {
 	// TODO: implement
 }
 
 // Reads a decimal value, assuming that the cursor is positioned at the start element that contains the value.
 // TODO: int or float?
-func readerReadDecimal(reader *XmlReader) int {
+func ReadDecimal(reader *XmlReader) int {
 	// TODO: implement
 }
 
 // Reads a list of decimal values, assuming that the cursor is positioned at the start element that contains the
 // values.
 // TODO: int or float?
-func readerReadDecimals(reader *XmlReader) []int {
+func ReadDecimals(reader *XmlReader) []int {
 	// TODO: implement
 }
 
 // Converts the given text to a date value.
-func readerParseDate(text *string) time.Time {
+func ParseDate(text *string) time.Time {
 	// TODO: implement
 }
 
 // Reads a date value, assuming that the cursor is positioned at the start element that contains the value.
-func readerReadDate(reader *XmlReader) time.Time {
+func ReadDate(reader *XmlReader) time.Time {
 	// TODO: implement
 }
 
 // Reads a list of dates values, assuming that the cursor is positioned at the start element that contains the
 // values.
-func readerReadDates(reader *XmlReader) []time.Time {
+func ReadDates(reader *XmlReader) []time.Time {
 	// TODO: implement
 }
