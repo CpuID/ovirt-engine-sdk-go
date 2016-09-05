@@ -99,10 +99,8 @@ public class ServicesGenerator implements GoGenerator {
         GoName serviceName = goNames.getServiceName(service);
 
         // Calculate the file name:
-        // TODO: camelcase to snakecase on file basename
-        String fileName = goNames.getPackagePath() + "/services/" + serviceName.getClassName();
         buffer = new GoBuffer();
-        buffer.setFileName(fileName);
+        buffer.setFileName(serviceName.getFileName());
 
         // Begin struct type:
         generateTypeDeclaration(service);
@@ -132,7 +130,7 @@ public class ServicesGenerator implements GoGenerator {
             buffer.write(out);
         }
         catch (IOException exception) {
-            throw new IllegalStateException("Error writing services file \"" + fileName + "\"", exception);
+            throw new IllegalStateException("Error writing services file \"" + serviceName.getFileName() + "\"", exception);
         }
     }
 

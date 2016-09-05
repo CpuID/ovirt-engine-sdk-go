@@ -216,14 +216,14 @@ public class GoNames {
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Go classes.
+     * Returns a representation of the given name using the capitalization style typically used for Go types.
      */
     public String getTypeStyleName(Name name) {
         return name.words().map(words::capitalize).collect(joining());
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Go members.
+     * Returns a representation of the given name using the capitalization style typically used for Go member functions.
      */
     public String getFuncStyleName(Name name) {
         // TODO: capitalized words, eg. VmService
@@ -243,10 +243,9 @@ public class GoNames {
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Go files.
+     * Returns a representation of the given name using the snake case style typically used for Go files.
      */
     public String getFileStyleName(Name name) {
-        // TODO: review
         return name.words().map(String::toLowerCase).collect(joining("_"));
     }
 }

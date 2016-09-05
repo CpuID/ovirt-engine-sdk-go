@@ -71,10 +71,8 @@ public class ReadersGenerator implements GoGenerator {
         GoName readerName = goNames.getReaderName(type);
         
         // Calculate the file name:
-        // TODO: camelcase to snakecase on file basename
-        String fileName = goNames.getPackagePath() + "/readers/" + readerName.getClassName();
         buffer = new GoBuffer();
-        buffer.setFileName(fileName);
+        buffer.setFileName(readerName.getFileName());
 
         // Begin class:
         GoName typeName = goNames.getTypeName(type);
@@ -171,7 +169,7 @@ public class ReadersGenerator implements GoGenerator {
             buffer.write(out);
         }
         catch (IOException exception) {
-            throw new IllegalStateException("Error writing readers file \"" + fileName + "\"", exception);
+            throw new IllegalStateException("Error writing readers file \"" + readerName.getFileName() + "\"", exception);
         }
     }
 

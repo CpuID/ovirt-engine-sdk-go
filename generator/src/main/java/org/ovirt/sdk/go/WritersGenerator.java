@@ -69,10 +69,8 @@ public class WritersGenerator implements GoGenerator {
         GoName writerName = goNames.getWriterName(type);
 
         // Calculate the file name:
-        // TODO: camelcase to snakecase on file basename
-        String fileName = goNames.getPackagePath() + "/writers/" + writerName.getClassName();
         buffer = new GoBuffer();
-        buffer.setFileName(fileName);
+        buffer.setFileName(writerName.getFileName());
 
         // Begin class:
         GoName baseName = goNames.getBaseWriterName();
@@ -115,7 +113,7 @@ public class WritersGenerator implements GoGenerator {
             buffer.write(out);
         }
         catch (IOException exception) {
-            throw new IllegalStateException("Error writing writers file \"" + fileName + "\"", exception);
+            throw new IllegalStateException("Error writing writers file \"" + writerName.getFileName() + "\"", exception);
         }
     }
 
