@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package ovirtsdk4
+package services
 
 //
 // This is the base functions for all the services of the SDK. It contains the utility methods used by all of them.
@@ -24,7 +24,7 @@ package ovirtsdk4
 //
 // This method is intended for internal use by other components of the SDK. Refrain from using it directly, as
 // backwards compatibility isn't guaranteed.
-func serviceRaiseError(response TODO, fault TODO) {
+func raiseError(response TODO, fault TODO) {
 	// TODO: implement
 }
 
@@ -32,7 +32,7 @@ func serviceRaiseError(response TODO, fault TODO) {
 //
 // This method is intended for internal use by other components of the SDK. Refrain from using it directly, as
 // backwards compatibility isn't guaranteed.
-func serviceCheckFault(response TODO) {
+func checkFault(response TODO) {
 	// TODO: implement
 }
 
@@ -41,6 +41,6 @@ func serviceCheckFault(response TODO) {
 //
 // This method is intended for internal use by other components of the SDK. Refrain from using it directly, as
 // backwards compatibility isn't guaranteed.
-func serviceCheckAction(response TODO) {
+func checkAction(response TODO) {
 	// TODO: implement
 }
