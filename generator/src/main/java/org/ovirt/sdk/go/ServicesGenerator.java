@@ -169,9 +169,9 @@ public class ServicesGenerator implements GoGenerator {
         if (doc == null) {
             doc = String.format("Adds a new `%1$s`.", arg);
         }
-        buffer.addComment();
         buffer.addComment(doc);
-        buffer.addLine("func (s *%1%s) %2$s(opts map[string]string)", method.getClass(), goNames.getFuncStyleName(methodName));
+        // TODO: we need the type declaration not getClass I believe... will need some kind of adjustment
+        buffer.addLine("func (s *%1$s) %2$s(somearg TODO, opts map[string]string) *TODO {", method.getClass(), goNames.getFuncStyleName(methodName));
 
         // Body:
         generateConvertLiteral(parameterType, arg);
@@ -185,8 +185,8 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine(  "check_fault(response)");
         buffer.addLine("end");
 
-        // End method:
-        buffer.addLine("end");
+        // End function:
+        buffer.addLine("}");
         buffer.addLine();
     }
 
@@ -198,12 +198,11 @@ public class ServicesGenerator implements GoGenerator {
         if (doc == null) {
             doc = String.format("Executes the `%1$s` method.", actionName);
         }
-        buffer.addComment();
         buffer.addComment(doc);
-        buffer.addComment();
-        buffer.addLine("def %1$s(opts = {})", actionName);
+        // TODO: we need the type declaration not getClass I believe... will need some kind of adjustment
+        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *TODO {", method.getClass(), actionName);
 
-        // Generate the method:
+        // Generate the function:
         buffer.addLine("action = Action.new(opts)");
         buffer.addLine("writer = XmlWriter.new(nil, true)");
         buffer.addLine("ActionWriter.write_one(action, writer)");
@@ -226,8 +225,8 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine(  "check_fault(response)");
         buffer.addLine("end");
 
-        // End method:
-        buffer.addLine("end");
+        // End function:
+        buffer.addLine("}");
         buffer.addLine();
     }
 
@@ -252,14 +251,13 @@ public class ServicesGenerator implements GoGenerator {
             .orElse(null);
 
         // Begin method:
-        buffer.addComment();
         String doc = method.getDoc();
         if (doc == null) {
             doc = "Returns the representation of the object managed by this service.";
         }
         buffer.addComment(doc);
         Name methodName = method.getName();
-        buffer.addLine("def %1$s(opts = {})", goNames.getFuncStyleName(methodName));
+        buffer.addLine("func (s *%1$s) %1$s(opts map[string]string) *TODO {", method.getClass(), goNames.getFuncStyleName(methodName));
 
         // Generate the input parameters:
         buffer.addLine("query = {}");
@@ -276,7 +274,7 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine("end");
 
         // End method:
-        buffer.addLine("end");
+        buffer.addLine("}");
         buffer.addLine();
     }
 
@@ -296,10 +294,9 @@ public class ServicesGenerator implements GoGenerator {
         if (doc == null) {
             doc = "Updates the object managed by this service.";
         }
-        buffer.addComment();
         buffer.addComment(doc);
-        buffer.addComment();
-        buffer.addLine("def %1$s(%2$s)", goNames.getFuncStyleName(methodName), arg);
+        // TODO: we need the type declaration not getClass I believe... will need some kind of adjustment
+        buffer.addLine("func (s *%1$s) %2$s(%3$s)", method.getClass(), goNames.getFuncStyleName(methodName), arg);
 
         // Body:
         generateConvertLiteral(parameterType, arg);
@@ -315,7 +312,7 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine("end");
 
         // End method:
-        buffer.addLine("end");
+        buffer.addLine("}");
         buffer.addLine();
     }
 
@@ -391,11 +388,9 @@ public class ServicesGenerator implements GoGenerator {
         if (doc == null) {
             doc = "Deletes the object managed by this service.";
         }
-        buffer.addComment();
         buffer.addComment(doc);
-        buffer.addComment();
-        buffer.addComment("@param opts [Hash] Additional options.");
-        buffer.addLine("def %1$s(opts = {})", goNames.getFuncStyleName(name));
+        // TODO: we need the type declaration not getClass I believe... will need some kind of adjustment
+        buffer.addLine("func (s *%1$s) %1$s(opts map[string]string)", method.getClass(), goNames.getFuncStyleName(name));
 
         // Generate the input parameters:
         buffer.addLine("query = {}");
