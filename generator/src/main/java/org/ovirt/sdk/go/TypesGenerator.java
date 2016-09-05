@@ -122,7 +122,7 @@ public class TypesGenerator implements GoGenerator {
         members.stream().sorted().forEach(member -> {
             Type memberType = member.getType();
             Name memberName = member.getName();
-            String docName = goNames.getFuncStyleName(memberName);
+            String docName = goNames.getPublicFuncStyleName(memberName);
             if (memberType instanceof PrimitiveType || memberType instanceof EnumType) {
                 buffer.addComment("@option opts :%1$s The value of attribute `%1$s`.", docName);
                 buffer.addComment();
@@ -140,7 +140,7 @@ public class TypesGenerator implements GoGenerator {
         buffer.addLine("def initialize(opts = {})");
         buffer.addLine(  "super(opts)");
         members.stream().sorted().forEach(member -> {
-            String memberName = goNames.getFuncStyleName(member.getName());
+            String memberName = goNames.getPublicFuncStyleName(member.getName());
             buffer.addLine("self.%1$s = opts[:%1$s]", memberName);
         });
         buffer.addLine("end");
@@ -159,7 +159,7 @@ public class TypesGenerator implements GoGenerator {
     private void generateGetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getFuncStyleName(name);
+        String property = goNames.getPublicFuncStyleName(name);
         buffer.addComment();
         buffer.addComment("Returns the value of the `%1$s` attribute.", property);
         buffer.addComment();
@@ -172,7 +172,7 @@ public class TypesGenerator implements GoGenerator {
     private void generateSetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getFuncStyleName(name);
+        String property = goNames.getPublicFuncStyleName(name);
         buffer.addComment();
         buffer.addComment("Sets the value of the `%1$s` attribute.", property);
         buffer.addComment();
@@ -237,7 +237,7 @@ public class TypesGenerator implements GoGenerator {
 
     private void generateEnumValue(EnumValue value) {
         String constantName = goNames.getConstantStyleName(value.getName());
-        String constantValue = goNames.getFuncStyleName(value.getName());
+        String constantValue = goNames.getPublicFuncStyleName(value.getName());
         buffer.addLine("%s = '%s'.freeze", constantName, constantValue);
     }
 

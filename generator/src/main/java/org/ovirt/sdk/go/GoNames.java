@@ -223,15 +223,18 @@ public class GoNames {
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Go member functions.
+     * Returns a representation of the given name using the capitalization style typically used for Go private functions.
      */
-    public String getFuncStyleName(Name name) {
-        // TODO: capitalized words, eg. VmService
-        String result = name.words().map(String::toLowerCase).collect(joining("_"));
-        if (reservedWords.contains(result)) {
-            result += "_";
-        }
-        return result;
+    public String getPrivateFuncStyleName(Name name) {
+        String capitalized = name.words().map(words::capitalize).collect(joining());
+        return Character.toLowerCase(capitalized.charAt(0)) + capitalized.substring(1);
+    }
+
+    /**
+     * Returns a representation of the given name using the capitalization style typically used for Go public functions.
+     */
+    public String getPublicFuncStyleName(Name name) {
+        return name.words().map(words::capitalize).collect(joining());
     }
 
     /**
