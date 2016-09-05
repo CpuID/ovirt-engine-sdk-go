@@ -24,8 +24,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
@@ -115,12 +117,11 @@ func (c *Connection) Setup(input_url string, username string, password string, t
 				return fmt.Errorf("The CA File '%s' doesn't exist.", c.caFile)
 			}
 			pool := x509.NewCertPool()
-			ca_certs, err := ioutil.readAll(c.caFile)
+			ca_certs, err := ioutil.ReadAll(c.caFile)
 			if err != nil {
 				return err
 			}
-			ok = pool.AppendCertsFromPEM([]byte{ca_certs})
-			if ok == false {
+			if ok := pool.AppendCertsFromPEM([]byte{ca_certs}); ok == false {
 				return fmt.Errorf("Failed to parse CA Certificate in file '%s'", c.caFile)
 			}
 			c.client.TLSClientConfig.RootCAs = pool
@@ -132,7 +133,7 @@ func (c *Connection) Setup(input_url string, username string, password string, t
 
 // Returns the base URL of this connection.
 func (c *Connection) Url() string {
-	return c.url
+	return c.url.String()
 }
 
 // Returns a reference to the root of the services tree.
@@ -259,12 +260,11 @@ func (c *Connection) getSsoResponse(input_url string, parameters map[string]stri
 				return ssoResponseJson{}, fmt.Errorf("The CA File '%s' doesn't exist.", c.caFile)
 			}
 			pool := x509.NewCertPool()
-			ca_certs, err := ioutil.readAll(c.caFile)
+			ca_certs, err := ioutil.ReadAll(c.caFile)
 			if err != nil {
 				return ssoResponseJson{}, err
 			}
-			ok = pool.AppendCertsFromPEM([]byte{ca_certs})
-			if ok == false {
+			if ok := pool.AppendCertsFromPEM([]byte{ca_certs}); ok == false {
 				return ssoResponseJson{}, fmt.Errorf("Failed to parse CA Certificate in file '%s'", c.caFile)
 			}
 			client.TLSClientConfig.RootCAs = pool
