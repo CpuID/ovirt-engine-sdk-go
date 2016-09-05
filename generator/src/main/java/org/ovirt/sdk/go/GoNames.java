@@ -61,7 +61,7 @@ public class GoNames {
     private Set<String> reservedWords;
 
     // The path of the package:
-    private String packagePath = "ovirtsdk4";
+    private String packagePath = "";
 
     // The version of the gem:
     private String version;

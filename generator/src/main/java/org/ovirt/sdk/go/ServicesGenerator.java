@@ -70,21 +70,8 @@ public class ServicesGenerator implements GoGenerator {
     }
 
     public void generate(Model model) {
-        // Calculate the file name:
-        String fileName = goNames.getPackagePath() + "/services";
-        buffer = new GoBuffer();
-        buffer.setFileName(fileName);
-
         // Generate the source:
         generateSource(model);
-
-        // Write the file:
-        try {
-            buffer.write(out);
-        }
-        catch (IOException exception) {
-            throw new IllegalStateException("Error writing services file \"" + fileName + "\"", exception);
-        }
     }
 
     private void generateSource(Model model) {
@@ -109,6 +96,14 @@ public class ServicesGenerator implements GoGenerator {
     }
 
     private void generateService(Service service) {
+        GoName serviceName = goNames.getServiceName(service);
+
+        // Calculate the file name:
+        // TODO: camelcase to snakecase on file basename
+        String fileName = goNames.getPackagePath() + "/services/" + serviceName.getClassName();
+        buffer = new GoBuffer();
+        buffer.setFileName(fileName);
+
         // Begin struct type:
         generateTypeDeclaration(service);
         buffer.addLine("	connection *ovirt_http.Connection");
@@ -118,7 +113,6 @@ public class ServicesGenerator implements GoGenerator {
 
         // Generate the constructor:
         buffer.addComment("Creates a new implementation of the service.");
-        GoName serviceName = goNames.getServiceName(service);
         buffer.addLine("func New%1$s(connection *ovirt_http.Connection, path string) *%1$s {", serviceName.getClassName(), serviceName.getClassName());
         buffer.addLine("  c.connection = connection");
         buffer.addLine("  c.path = path");
@@ -132,6 +126,14 @@ public class ServicesGenerator implements GoGenerator {
 
         // Generate other methods that don't correspond to model methods or locators:
         generateToS(service);
+
+        // Write the file:
+        try {
+            buffer.write(out);
+        }
+        catch (IOException exception) {
+            throw new IllegalStateException("Error writing services file \"" + fileName + "\"", exception);
+        }
     }
 
     private void generateMethod(Method method) {
