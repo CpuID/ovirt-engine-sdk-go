@@ -47,8 +47,12 @@ public class GoBuffer {
     // The name of the file:
     private String fileName;
 
-    // The things to be required, without the "required" keyword and quotes.
-    private Set<String> requires = new HashSet<>();
+    // The Go package within the file:
+    private String packageName;
+
+    // The things to be imported:
+    // TODO: manage the aliasing aspects of this...
+    private Set<String> imports = new HashSet<>();
 
     // The lines of the body of the class:
     private List<String> lines = new ArrayList<>();
@@ -61,6 +65,13 @@ public class GoBuffer {
      */
     public void setFileName(String newFileName) {
         fileName = newFileName;
+    }
+
+    /**
+     * Sets the package name.
+     */
+    public void setPackageName(String newPackageName) {
+        packageName = newPackageName;
     }
 
     /**
@@ -218,12 +229,11 @@ public class GoBuffer {
         buffer.append("// limitations under the License.\n");
         buffer.append("//\n");
         buffer.append("\n");
-        buffer.append("package ovirtsdk4\n");
+        buffer.append(String.format("package %1$s\n", packageName));
         buffer.append("\n");
 
         // Imports:
-        // TODO: requires should be imports
-        List<String> importList = new ArrayList<>(requires);
+        List<String> importList = new ArrayList<>(imports);
         Collections.sort(importList);
         buffer.append("import (\n");
         for (String importItem : importList) {

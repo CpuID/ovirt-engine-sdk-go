@@ -101,6 +101,7 @@ public class ServicesGenerator implements GoGenerator {
         // Calculate the file name:
         buffer = new GoBuffer();
         buffer.setFileName(serviceName.getFileName());
+        buffer.setPackageName("services");
 
         // Begin struct type:
         generateTypeDeclaration(service);

@@ -59,6 +59,7 @@ public class TypesGenerator implements GoGenerator {
         String fileName = goNames.getPackagePath() + "/types/types";
         buffer = new GoBuffer();
         buffer.setFileName(fileName);
+        buffer.setPackageName("types");
 
         // Generate the source:
         generateStructs(model);

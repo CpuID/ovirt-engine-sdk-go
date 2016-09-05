@@ -73,6 +73,7 @@ public class ReadersGenerator implements GoGenerator {
         // Calculate the file name:
         buffer = new GoBuffer();
         buffer.setFileName(readerName.getFileName());
+        buffer.setPackageName("readers");
 
         // Begin class:
         GoName typeName = goNames.getTypeName(type);

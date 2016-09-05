@@ -71,6 +71,7 @@ public class WritersGenerator implements GoGenerator {
         // Calculate the file name:
         buffer = new GoBuffer();
         buffer.setFileName(writerName.getFileName());
+        buffer.setPackageName("writers");
 
         // Begin class:
         GoName baseName = goNames.getBaseWriterName();
