@@ -23,8 +23,9 @@ import (
 // TODO: do we want to mandate some functions on any type we know implements XmlReader?
 type XmlReader interface{}
 
-// This is the base methods for all the readers of the SDK. It contains
-// the utility methods used by all of them.
+//
+// This is the base functions for all the readers of the SDK. It contains the utility methods used by all of them.
+//
 
 // Reads a string value, assuming that the cursor is positioned at the start element that contains the value.
 func readerReadString(reader *XmlReader) string {
