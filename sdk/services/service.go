@@ -20,6 +20,11 @@ package services
 // This is the base functions for all the services of the SDK. It contains the utility methods used by all of them.
 //
 
+// The options permitted on any service remove operation.
+type RemoveOpts struct {
+	Async bool // Indicates if the remove should be performed asynchronously.
+}
+
 // Creates and raises an error containing the details of the given HTTP response and fault.
 //
 // This method is intended for internal use by other components of the SDK. Refrain from using it directly, as

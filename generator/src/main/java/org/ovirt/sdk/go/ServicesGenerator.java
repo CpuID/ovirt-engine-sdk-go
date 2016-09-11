@@ -167,14 +167,17 @@ public class ServicesGenerator implements GoGenerator {
         Name methodName = method.getName();
         Type parameterType = parameter.getType();
         Name parameterName = parameter.getName();
+        // TODO: review, parameterName vs methodName?
         String arg = goNames.getPublicFuncStyleName(parameterName);
+        String actionName = goNames.getPublicFuncStyleName(methodName);
+        String typeName = getTypeDeclaration(method.getDeclaringService());
         String doc = method.getDoc();
         if (doc == null) {
             doc = String.format("Adds a new `%1$s`.", arg);
         }
         buffer.addComment(doc);
         // TODO: fix input/outputs of below.
-        buffer.addLine("func (s *%1$s) %2$s(somearg TODO, opts map[string]string) *TODO {", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(methodName));
+        buffer.addLine("func (s *%1$s) %2$s(somearg TODO, opts map[string]string) *%3$s {", typeName, actionName, typeName);
 
         // Body:
         // TODO: implement
@@ -198,15 +201,16 @@ public class ServicesGenerator implements GoGenerator {
         // Begin method:
         Name methodName = method.getName();
         String actionName = goNames.getPublicFuncStyleName(methodName);
+        String typeName = getTypeDeclaration(method.getDeclaringService());
         String doc = method.getDoc();
         if (doc == null) {
             doc = String.format("Executes the `%1$s` method.", actionName);
         }
         buffer.addComment(doc);
-        // TODO: fix output/s of below.
-        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *TODO {", getTypeDeclaration(method.getDeclaringService()), actionName);
+        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", typeName, actionName, typeName);
 
         // Generate the function:
+        // TODO: implement
         buffer.addLine("action = Action.new(opts)");
         buffer.addLine("writer = XmlWriter.new(nil, true)");
         buffer.addLine("ActionWriter.write_one(action, writer)");
@@ -261,13 +265,16 @@ public class ServicesGenerator implements GoGenerator {
         }
         buffer.addComment(doc);
         Name methodName = method.getName();
-        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *TODO {", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(methodName));
+        String typeName = getTypeDeclaration(method.getDeclaringService());
+        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", typeName, goNames.getPublicFuncStyleName(methodName), typeName);
 
         // Generate the input parameters:
+        // TODO: implement
         buffer.addLine("query = {}");
         inParameters.forEach(this::generateUrlParameter);
 
         // Body:
+        // TODO: implement
         buffer.addLine("request = Request.new(:method => :GET, :path => @path, :query => query)");
         buffer.addLine("response = @connection.send(request)");
         buffer.addLine("case response.code");
@@ -299,7 +306,8 @@ public class ServicesGenerator implements GoGenerator {
             doc = "Updates the object managed by this service.";
         }
         buffer.addComment(doc);
-        // TODO: fix inputs/outputs
+        // TODO: fix function args
+        // TODO: add some return type, bool or error most likely
         buffer.addLine("func (s *%1$s) %2$s(%3$s)", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(methodName), arg);
 
         // Body:
@@ -390,17 +398,18 @@ public class ServicesGenerator implements GoGenerator {
         Name name = method.getName();
         String doc = method.getDoc();
         if (doc == null) {
-            doc = "Deletes the object managed by this service.";
+            doc = "Deletes the object managed by this service. If Async = true, error will always be nil.";
         }
         buffer.addComment(doc);
-        // TODO: fix inputs/outputs
-        buffer.addLine("func (s *%1$s) %1$s(opts map[string]string) {", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(name));
+        buffer.addLine("func (s *%1$s) %2$s(opts RemoveOpts) error {", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(name));
 
         // Generate the input parameters:
+        // TODO: implement
         buffer.addLine("query = {}");
         inParameters.forEach(this::generateUrlParameter);
 
         // Generate the method:
+        // TODO: implement
         buffer.addLine(  "request = Request.new(:method => :DELETE, :path => @path, :query => query)");
         buffer.addLine(  "response = @connection.send(request)");
         buffer.addLine(  "unless response.code == 200");
