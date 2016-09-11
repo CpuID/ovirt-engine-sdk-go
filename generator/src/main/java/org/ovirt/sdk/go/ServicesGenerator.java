@@ -170,14 +170,16 @@ public class ServicesGenerator implements GoGenerator {
         // TODO: review, parameterName vs methodName?
         String arg = goNames.getPublicFuncStyleName(parameterName);
         String actionName = goNames.getPublicFuncStyleName(methodName);
-        String typeName = getTypeDeclaration(method.getDeclaringService());
+        String serviceTypeName = getTypeDeclaration(method.getDeclaringService());
         String doc = method.getDoc();
         if (doc == null) {
             doc = String.format("Adds a new `%1$s`.", arg);
         }
         buffer.addComment(doc);
         // TODO: fix input/outputs of below.
-        buffer.addLine("func (s *%1$s) %2$s(somearg TODO, opts map[string]string) *%3$s {", typeName, actionName, typeName);
+        // TODO: %2 should be the same parameterType as %3
+        // TODO: %3 should not be serviceTypeName, it should be the parameter type. verify the format of parameterType (translate?), needs to be types.Type
+        buffer.addLine("func (s *%1$s) %2$s(somearg TODO, opts map[string]string) *%3$s {", serviceTypeName, actionName, parameterType);
 
         // Body:
         // TODO: implement
@@ -201,13 +203,14 @@ public class ServicesGenerator implements GoGenerator {
         // Begin method:
         Name methodName = method.getName();
         String actionName = goNames.getPublicFuncStyleName(methodName);
-        String typeName = getTypeDeclaration(method.getDeclaringService());
+        String serviceTypeName = getTypeDeclaration(method.getDeclaringService());
         String doc = method.getDoc();
         if (doc == null) {
             doc = String.format("Executes the `%1$s` method.", actionName);
         }
         buffer.addComment(doc);
-        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", typeName, actionName, typeName);
+        // TODO: %3 should not be serviceTypeName, it should be the parameter type. verify the format of parameterType (translate?), needs to be types.Type
+        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", serviceTypeName, actionName, serviceTypeName);
 
         // Generate the function:
         // TODO: implement
@@ -265,12 +268,12 @@ public class ServicesGenerator implements GoGenerator {
         }
         buffer.addComment(doc);
         Name methodName = method.getName();
-        String typeName = getTypeDeclaration(method.getDeclaringService());
-        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", typeName, goNames.getPublicFuncStyleName(methodName), typeName);
+        String serviceTypeName = getTypeDeclaration(method.getDeclaringService());
+        // TODO: %3 should not be serviceTypeName, it should be the parameter type. verify the format of parameterType (translate?), needs to be types.Type
+        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", serviceTypeName, goNames.getPublicFuncStyleName(methodName), serviceTypeName);
 
         // Generate the input parameters:
-        // TODO: implement
-        buffer.addLine("query = {}");
+        buffer.addLine("var query map[string]string");
         inParameters.forEach(this::generateUrlParameter);
 
         // Body:
@@ -306,9 +309,9 @@ public class ServicesGenerator implements GoGenerator {
             doc = "Updates the object managed by this service.";
         }
         buffer.addComment(doc);
-        // TODO: fix function args
+        // TODO: fix function args, needs to be named (is i sufficient? or use something more elegant?). it also needs to come from types.arg
         // TODO: add some return type, bool or error most likely
-        buffer.addLine("func (s *%1$s) %2$s(%3$s)", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(methodName), arg);
+        buffer.addLine("func (s *%1$s) %2$s(i %3$s)", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(methodName), arg);
 
         // Body:
         generateConvertLiteral(parameterType, arg);
@@ -405,7 +408,7 @@ public class ServicesGenerator implements GoGenerator {
 
         // Generate the input parameters:
         // TODO: implement
-        buffer.addLine("query = {}");
+        buffer.addLine("var query map[string]string");
         inParameters.forEach(this::generateUrlParameter);
 
         // Generate the method:
@@ -424,7 +427,8 @@ public class ServicesGenerator implements GoGenerator {
         Name name = parameter.getName();
         String symbol = goNames.getPublicFuncStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
-        buffer.addLine("value = opts[:%1$s]", symbol);
+        // TODO: check if opts contains the key %1$s before using it, to avoid panics
+        buffer.addLine("value = opts[\"%1$s\"]", symbol);
         buffer.addLine("unless value.nil?");
         if (type instanceof PrimitiveType) {
             Model model = type.getModel();
@@ -447,14 +451,10 @@ public class ServicesGenerator implements GoGenerator {
 
     private void generateToS(Service service) {
         GoName serviceName = goNames.getServiceName(service);
-        buffer.addComment();
         buffer.addComment("Returns an string representation of this service.");
-        buffer.addComment();
-        buffer.addComment("@return [String]");
-        buffer.addComment();
-        buffer.addLine("def to_s");
-        buffer.addLine(  "return \"#<#{%1$s}:#{@path}>\"", serviceName.getClassName());
-        buffer.addLine("end");
+        buffer.addLine("func (s *%1$s) ToString () string {", serviceName.getClassName());
+        buffer.addLine("  return fmt.Sprintf(\"#<%1$s:%%s>\", s.path)", serviceName.getClassName());
+        buffer.addLine("}");
         buffer.addLine();
     }
 

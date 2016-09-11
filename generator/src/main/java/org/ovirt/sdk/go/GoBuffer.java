@@ -93,6 +93,7 @@ public class GoBuffer {
      */
     private void addLineNoSplit(String line) {
         // Check of the line is the begin or end of a block:
+        // TODO: adjust block boundary definitions for golang
         boolean isBegin =
             line.endsWith("(") ||
             line.endsWith("[") ||
