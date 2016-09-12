@@ -105,6 +105,14 @@ public class ServicesGenerator implements GoGenerator {
         buffer.setFileName(serviceName.getFileName());
         buffer.setPackageName("services");
 
+        // Set our imports
+        String repoSdkUrl = goNames.repoSdkUrl();
+        buffer.addImport(repoSdkUrl + "/http");
+        buffer.addImport(repoSdkUrl + "/readers");
+        buffer.addImport(repoSdkUrl + "/types");
+        buffer.addImport(repoSdkUrl + "/writers");
+        buffer.addImport(repoSdkUrl + "/version");
+
         // Begin struct type:
         generateTypeDeclaration(service);
         buffer.addLine("	connection *ovirt_http.Connection");

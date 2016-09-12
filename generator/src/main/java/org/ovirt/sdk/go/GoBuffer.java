@@ -37,7 +37,7 @@ import org.apache.commons.io.FileUtils;
 
 /**
  * This class is a buffer intended to simplify generation of Go source code. It stores the name of the module, the
- * list of requires and the rest of the source separately, so that requires can be added on demand while generating the
+ * list of imports and the rest of the source separately, so that imports can be added on demand while generating the
  * rest of the source.
  */
 public class GoBuffer {
@@ -51,8 +51,7 @@ public class GoBuffer {
     private String packageName;
 
     // The things to be imported:
-    // TODO: manage the aliasing aspects of this...
-    private Set<String> imports = new HashSet<>();
+    private List<String> imports = new ArrayList<>();
 
     // The lines of the body of the class:
     private List<String> lines = new ArrayList<>();
@@ -72,6 +71,13 @@ public class GoBuffer {
      */
     public void setPackageName(String newPackageName) {
         packageName = newPackageName;
+    }
+
+    /**
+     * Adds an import to the list for this file/buffer.
+     */
+    public void addImport(String importPath) {
+      imports.add(importPath);
     }
 
     /**

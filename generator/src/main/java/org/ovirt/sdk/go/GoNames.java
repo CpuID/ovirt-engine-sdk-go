@@ -73,6 +73,13 @@ public class GoNames {
         return packagePath;
     }
 
+    /*
+     * Defines the repo prefix used when defining imports.
+     */
+    public String repoSdkUrl() {
+      return "github.com/CpuID/ovirt-engine-sdk-go/sdk";
+    }
+
     /**
      * Get the version.
      */
