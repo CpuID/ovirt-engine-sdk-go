@@ -16,9 +16,19 @@
 
 package services
 
+import (
+	"github.com/CpuID/ovirt-engine-sdk-go/sdk/types"
+)
+
 //
 // This is the base functions for all the services of the SDK. It contains the utility methods used by all of them.
 //
+
+type Service interface {
+	// TODO: necessary? is ToString() sufficient?
+	Service() Service
+	ToString() string
+}
 
 // The options permitted on any service remove operation.
 type RemoveOpts struct {
@@ -29,7 +39,7 @@ type RemoveOpts struct {
 //
 // This method is intended for internal use by other components of the SDK. Refrain from using it directly, as
 // backwards compatibility isn't guaranteed.
-func raiseError(response TODO, fault TODO) {
+func raiseError(response *types.Response, fault TODO) {
 	// TODO: implement
 }
 
@@ -37,7 +47,7 @@ func raiseError(response TODO, fault TODO) {
 //
 // This method is intended for internal use by other components of the SDK. Refrain from using it directly, as
 // backwards compatibility isn't guaranteed.
-func checkFault(response TODO) {
+func checkFault(response *types.Response) {
 	// TODO: implement
 }
 
@@ -46,6 +56,6 @@ func checkFault(response TODO) {
 //
 // This method is intended for internal use by other components of the SDK. Refrain from using it directly, as
 // backwards compatibility isn't guaranteed.
-func checkAction(response TODO) {
+func checkAction(response *types.Response) {
 	// TODO: implement
 }

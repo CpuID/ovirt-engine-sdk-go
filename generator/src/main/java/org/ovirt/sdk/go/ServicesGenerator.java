@@ -123,9 +123,10 @@ public class ServicesGenerator implements GoGenerator {
         // Generate the methods and locators:
         service.methods().sorted().forEach(this::generateMethod);
         service.locators().sorted().forEach(this::generateLocator);
-        generatePathLocator(service);
+        // TODO: how relevant is this OO hierarchial lookup in a non-OO golang implementation...? commented out for now, see how we go.
+        //generatePathLocator(service);
 
-        // Generate other methods that don't correspond to model methods or locators:
+        // Generate other functions that don't correspond to model functions or locators:
         generateToS(service);
 
         // Write the file:
@@ -273,19 +274,25 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", serviceTypeName, goNames.getPublicFuncStyleName(methodName), serviceTypeName);
 
         // Generate the input parameters:
-        buffer.addLine("var query map[string]string");
+        buffer.addLine("  query := make(map[string]string)");
         inParameters.forEach(this::generateUrlParameter);
 
         // Body:
-        // TODO: implement
-        buffer.addLine("request = Request.new(:method => :GET, :path => @path, :query => query)");
-        buffer.addLine("response = @connection.send(request)");
-        buffer.addLine("case response.code");
-        buffer.addLine("when 200");
+        buffer.addLine();
+        buffer.addLine("  request := types.Request{");
+        buffer.addLine("    Method: \"GET\",");
+        buffer.addLine("    Path: s.path,");
+        buffer.addLine("    Query: query,");
+        buffer.addLine("  }");
+        buffer.addLine("  response, err := s.connection.Send(&request)");
+        buffer.addLine("  if err != nil {");
+        buffer.addLine("    // TODO: error handling. call checkFault(&response)?");
+        buffer.addLine("  }");
+        buffer.addLine("  if *response.Code == 200 {");
         generateReturnResponseBody(mainParameter);
-        buffer.addLine("else");
-        buffer.addLine(  "check_fault(response)");
-        buffer.addLine("end");
+        buffer.addLine("  } else {");
+        buffer.addLine("    checkFault(&response)");
+        buffer.addLine("  }");
 
         // End method:
         buffer.addLine("}");
@@ -315,22 +322,28 @@ public class ServicesGenerator implements GoGenerator {
 
         // Body:
         generateConvertLiteral(parameterType, arg);
-        buffer.addLine("request = Request.new(:method => :PUT, :path => @path)");
+        buffer.addLine();
+        buffer.addLine("  request := types.Request{");
+        buffer.addLine("    Method: \"PUT\",");
+        buffer.addLine("    Path: s.path,");
+        buffer.addLine("  }");
         generateWriteRequestBody(parameter, arg);
-        buffer.addLine("response = @connection.send(request)");
-        buffer.addLine("case response.code");
-        buffer.addLine("when 200");
+        buffer.addLine("  response, err := s.connection.Send(&request)");
+        buffer.addLine("  if err != nil {");
+        buffer.addLine("    // TODO: error handling. call checkFault(&response)?");
+        buffer.addLine("  }");
+        buffer.addLine("  if *response.Code == 200 {");
         generateReturnResponseBody(parameter);
-        buffer.addLine(  "return result");
-        buffer.addLine("else");
-        buffer.addLine(  "check_fault(response)");
-        buffer.addLine("end");
+        buffer.addLine("  } else {");
+        buffer.addLine("    checkFault(&response)");
+        buffer.addLine("  }");
 
         // End method:
         buffer.addLine("}");
         buffer.addLine();
     }
 
+    // TODO: review
     private void generateConvertLiteral(Type type, String variable) {
         if (type instanceof StructType) {
             buffer.addLine("if %1$s.is_a?(Hash)", variable);
@@ -351,6 +364,7 @@ public class ServicesGenerator implements GoGenerator {
         }
     }
 
+    // TODO: review
     private void generateWriteRequestBody(Parameter parameter, String variable) {
         Type type = parameter.getType();
         buffer.addLine("begin");
@@ -371,6 +385,7 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine("end");
     }
 
+    // TODO: review
     private void generateReturnResponseBody(Parameter parameter) {
         Type type = parameter.getType();
         buffer.addLine("begin");
@@ -407,17 +422,23 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine("func (s *%1$s) %2$s(opts RemoveOpts) error {", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(name));
 
         // Generate the input parameters:
-        // TODO: implement
-        buffer.addLine("var query map[string]string");
+        buffer.addLine("  query := make(map[string]string)");
         inParameters.forEach(this::generateUrlParameter);
 
         // Generate the method:
-        // TODO: implement
-        buffer.addLine(  "request = Request.new(:method => :DELETE, :path => @path, :query => query)");
-        buffer.addLine(  "response = @connection.send(request)");
-        buffer.addLine(  "unless response.code == 200");
-        buffer.addLine(    "check_fault(response)");
-        buffer.addLine(  "end");
+        buffer.addLine();
+        buffer.addLine("  request := types.Request{");
+        buffer.addLine("    Method: \"DELETE\",");
+        buffer.addLine("    Path: s.path,");
+        buffer.addLine("    Query: query,");
+        buffer.addLine("  }");
+        buffer.addLine("  response, err := s.connection.Send(&request)");
+        buffer.addLine("  if err != nil {");
+        buffer.addLine("    // TODO: error handling. call checkFault(&response)?");
+        buffer.addLine("  }");
+        buffer.addLine("  if *response.Code != 200 {");
+        buffer.addLine("    checkFault(&response)");
+        buffer.addLine("  }");
         buffer.addLine("}");
         buffer.addLine();
     }
@@ -425,28 +446,28 @@ public class ServicesGenerator implements GoGenerator {
     private void generateUrlParameter(Parameter parameter) {
         Type type = parameter.getType();
         Name name = parameter.getName();
+        // TODO: use a nicer function than this...?
         String symbol = goNames.getPublicFuncStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
-        // TODO: check if opts contains the key %1$s before using it, to avoid panics
-        buffer.addLine("value = opts[\"%1$s\"]", symbol);
-        buffer.addLine("unless value.nil?");
+        // TODO: is this suitable for all input types...? or we need to compare against != "" sometimes? or len(opts.%1$s) != 0?
+        buffer.addLine("  if opts.%1$s != nil {", symbol);
         if (type instanceof PrimitiveType) {
             Model model = type.getModel();
             if (type == model.getBooleanType()) {
-                buffer.addLine("value = Writer.render_boolean(value)", tag);
+                buffer.addLine("    value := writers.RenderBoolean(opts.%1$s)", symbol);
             }
             else if (type == model.getIntegerType()) {
-                buffer.addLine("value = Writer.render_integer(value)", tag);
+                buffer.addLine("    value := writers.RenderInteger(opts.%1$s)", symbol);
             }
             else if (type == model.getDecimalType()) {
-                buffer.addLine("value = Writer.render_decimal(value)", tag);
+                buffer.addLine("    value := writers.RenderDecimal(opts.%1$s)", symbol);
             }
             else if (type == model.getDateType()) {
-                buffer.addLine("value = Writer.render_date(value)", tag);
+                buffer.addLine("    value := writers.RenderDate(opts.%1$s)", symbol);
             }
         }
-        buffer.addLine(  "query['%1$s'] = value", tag);
-        buffer.addLine("end");
+        buffer.addLine("    query[\"%1$s\"] = value", tag);
+        buffer.addLine("  }");
     }
 
     private void generateToS(Service service) {
@@ -473,20 +494,18 @@ public class ServicesGenerator implements GoGenerator {
         String methodName = goNames.getPublicFuncStyleName(locator.getName());
         String argName = goNames.getPublicFuncStyleName(parameter.getName());
         GoName serviceName = goNames.getServiceName(locator.getService());
+
         String doc = locator.getDoc();
         if (doc == null) {
             doc = String.format("Locates the `%1$s` service.", methodName);
         }
-        buffer.addComment();
         buffer.addComment(doc);
-        buffer.addComment();
-        buffer.addComment("@param %1$s [String] The identifier of the `%2$s`.", argName, methodName);
-        buffer.addComment();
-        buffer.addComment("@return [%1$s] A reference to the `%2$s` service.", serviceName.getClassName(), methodName);
-        buffer.addComment();
-        buffer.addLine("def %1$s_service(%2$s)", methodName, argName);
-        buffer.addLine(  "return %1$s.new(@connection, \"#{@path}/#{%2$s}\")", serviceName.getClassName(), argName);
-        buffer.addLine("end");
+        buffer.addComment("Takes a string input of the identifier of the `%1$s`.", methodName);
+        buffer.addComment("Returns a reference to the `%1$s` service.", methodName);
+        // TODO: the %1$s is incorrect here, needs to be the type of the service its attached to, not the reference service.
+        buffer.addLine("func (s *%1$s) %2$sService(%3$s) *%4$s {", getTypeDeclaration(locator.getService()), methodName, argName, serviceName.getClassName());
+        buffer.addLine("  return New%1$s(s.connection, fmt.Sprintf(\"%%s/%2$s\", s.path))", serviceName.getClassName(), argName);
+        buffer.addLine("}");
         buffer.addLine();
     }
 
@@ -498,31 +517,27 @@ public class ServicesGenerator implements GoGenerator {
         if (doc == null) {
             doc = String.format("Locates the `%1$s` service.", methodName);
         }
-        buffer.addComment();
         buffer.addComment(doc);
-        buffer.addComment();
-        buffer.addComment("@return [%1$s] A reference to `%2$s` service.", serviceName.getClassName(), methodName);
-        buffer.addLine("def %1$s_service", methodName);
-        buffer.addLine(  "return %1$s.new(@connection, \"#{@path}/%2$s\")", serviceName.getClassName(), urlSegment);
-        buffer.addLine("end");
+        buffer.addComment("Returns a reference to the `%1$s` service.", methodName);
+        // TODO: the %1$s is incorrect here, needs to be the type of the service its attached to, not the reference service.
+        buffer.addLine("func (s *%1$s) %2$sService () *%3$s {", getTypeDeclaration(locator.getService()), methodName, serviceName.getClassName());
+        buffer.addLine("  return New%1$s(s.connection, fmt.Sprintf(\"%%s/%2$s\", s.path))", serviceName.getClassName(), urlSegment);
+        buffer.addLine("}");
         buffer.addLine();
     }
 
     private void generatePathLocator(Service service) {
         // Begin method:
-        buffer.addComment();
         buffer.addComment("Locates the service corresponding to the given path.");
-        buffer.addComment();
-        buffer.addComment("@param path [String] The path of the service.");
-        buffer.addComment();
-        buffer.addComment("@return [Service] A reference to the service.");
-        buffer.addComment();
-        buffer.addLine("def service(path)");
-        buffer.addLine(  "if path.nil? || path == ''");
-        buffer.addLine(    "return self");
-        buffer.addLine(  "end");
+        buffer.addComment("Takes a string input of the path of the service.");
+        buffer.addComment("Returns a reference to the service.");
+        buffer.addLine("func (s %1$s) Service(path string) *Service {");
+        buffer.addLine("  if len(path) == 0 {");
+        buffer.addLine("    return s");
+        buffer.addLine("  }");
 
         // Generate the code that checks if the path corresponds to any of the locators without parameters:
+        // TODO: review
         service.locators().filter(x -> x.getParameters().isEmpty()).sorted().forEach(locator -> {
             Name name = locator.getName();
             String segment = getPath(name);
@@ -540,6 +555,7 @@ public class ServicesGenerator implements GoGenerator {
 
         // If the path doesn't correspond to a locator without parameters, then it will correspond to the locator
         // with parameters, otherwise it is an error:
+        // TODO: review
         Optional<Locator> optional = service.locators().filter(x -> !x.getParameters().isEmpty()).findAny();
         if (optional.isPresent()) {
             Locator locator = optional.get();
@@ -558,7 +574,7 @@ public class ServicesGenerator implements GoGenerator {
         }
 
         // End method:
-        buffer.addLine("end");
+        buffer.addLine("}");
         buffer.addLine();
     }
 

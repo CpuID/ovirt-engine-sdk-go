@@ -17,6 +17,7 @@
 package writers
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -34,7 +35,7 @@ func WriteString(writer *XmlWriter, name string, value string) {
 
 // Converts the given boolean value to an string.
 func RenderBoolean(value bool) string {
-	// TODO: implement
+	return fmt.Sprintf("%t", value)
 }
 
 // Writes an element with the given name and boolean value.
@@ -44,7 +45,7 @@ func WriteBoolean(writer *XmlWriter, name string, value string) {
 
 // Converts the given integer value to an string.
 func RenderInteger(value int) string {
-	// TODO: implement
+	return fmt.Sprintf("%d", value)
 }
 
 // Writes an element with the given name and integer value.
@@ -54,13 +55,13 @@ func WriteInteger(writer *XmlWriter, name string, value int) {
 
 // Converts the given decimal value to an string.
 // TODO: int or float?
-func RenderDecimal(value int) string {
-	// TODO: implement
+func RenderDecimal(value float64) string {
+	return fmt.Sprintf("%f", value)
 }
 
 // Writes an element with the given name and decimal value.
 // TODO: int or float?
-func WriteDecimal(writer *XmlWriter, name string, value int) {
+func WriteDecimal(writer *XmlWriter, name string, value float64) {
 	// TODO: implement
 }
 

@@ -35,21 +35,21 @@ import (
 )
 
 // This type represents an HTTP request.
-type request struct {
-	method  string
-	path    string
-	headers map[string]string
-	query   map[string]string
-	body    string
+type Request struct {
+	Method  string
+	Path    string
+	Headers map[string]string
+	Query   map[string]string
+	Body    string
 }
 
 // This type represents an HTTP response.
-type response struct {
-	body    string
-	code    int
-	headers map[string]string
+type Response struct {
+	Body    string
+	Code    int
+	Headers map[string]string
 	// Not used?
-	// message string
+	// Message string
 }
 
 // This type (and its attached functions) are responsible for managing an HTTP connection to the engine server.
@@ -152,28 +152,28 @@ func (c *Connection) Service(path string) *Service {
 }
 
 // Sends an HTTP request and waits for the response.
-func (c *Connection) send(r *request) (*response, error) {
-	var result response
+func (c *Connection) Send(r *Request) (*Response, error) {
+	var result Response
 
 	// Check if we already have an SSO access token:
 	c.token = c.getAccessToken()
 
 	// Build the URL:
-	use_url := c.buildUrl(r.path, r.query)
+	use_url := c.buildUrl(r.Path, r.Query)
 
 	// Validate the method selected:
-	if slice.stringInSlice(r.method, []string{"DELETE", "GET", "PUT", "HEAD", "POST"}) == false {
-		return &result, fmt.Errorf("The HTTP method '%s' is invalid, we expected one of DELETE/GET/PUT/HEAD/POST.", r.method)
+	if slice.stringInSlice(r.Method, []string{"DELETE", "GET", "PUT", "HEAD", "POST"}) == false {
+		return &result, fmt.Errorf("The HTTP method '%s' is invalid, we expected one of DELETE/GET/PUT/HEAD/POST.", r.Method)
 	}
 
 	// Build the net/http request:
-	req, err := http.NewRequest(r.method, use_url, nil)
+	req, err := http.NewRequest(r.Method, use_url, nil)
 	if err != nil {
 		return &result, err
 	}
 
 	// Add request headers:
-	for k1, v1 := range r.headers {
+	for k1, v1 := range r.Headers {
 		req.Header.Add(k1, v1)
 	}
 	req.Header.Add("User-Agent", fmt.Sprintf("GoSDK/%s", version.SdkVersion))
