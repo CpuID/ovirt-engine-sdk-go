@@ -5,6 +5,10 @@ import (
 	"github.com/CpuID/ovirt-engine-sdk-go/sdk/types"
 )
 
+// This file was written by hand, to use as a reference example of what the golang output should look like.
+// I then went ahead and started adjusting the Java codebase to generate this output at a minimum.
+// Once this has been achieved, this file can be removed.
+
 type AffinityGroupService struct {
 }
 
