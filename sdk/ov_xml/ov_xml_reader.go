@@ -27,7 +27,7 @@ import (
 type XmlReader struct{}
 
 // TODO: review types
-func Initialize(self string, io string) *XmlReader {
+func NewXmlReader(self string, io string) *XmlReader {
 	var reader XmlReader
 	// TODO: implement
 	return *reader

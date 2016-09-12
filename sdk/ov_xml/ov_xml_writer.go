@@ -27,7 +27,7 @@ import (
 type XmlWriter struct{}
 
 // TODO: review types
-func Initialize(argc int, argv map[string]string) *XmlWriter {
+func NewXmlWriter(argc int, argv map[string]string) *XmlWriter {
 	var writer XmlWriter
 	// TODO: implement
 	return *writer

@@ -191,17 +191,23 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine("func (s *%1$s) %2$s(somearg TODO, opts map[string]string) *%3$s {", serviceTypeName, actionName, parameterType);
 
         // Body:
-        // TODO: implement
+        buffer.addLine();
         generateConvertLiteral(parameterType, arg);
-        buffer.addLine("request = Request.new(:method => :POST, :path => @path)");
+        buffer.addLine();
+        buffer.addLine("  request := types.Request{");
+        buffer.addLine("    Method: \"GET\",");
+        buffer.addLine("    Path: s.path,");
+        buffer.addLine("  }");
         generateWriteRequestBody(parameter, arg);
-        buffer.addLine("response = @connection.send(request)");
-        buffer.addLine("case response.code");
-        buffer.addLine("when 201, 202");
+        buffer.addLine("  response, err := s.connection.Send(&request)");
+        buffer.addLine("  if err != nil {");
+        buffer.addLine("    // TODO: error handling. call checkFault(&response)?");
+        buffer.addLine("  }");
+        buffer.addLine("  if *response.Code == 201 || *response.Code == 202 {");
         generateReturnResponseBody(parameter);
-        buffer.addLine("else");
-        buffer.addLine(  "check_fault(response)");
-        buffer.addLine("end");
+        buffer.addLine("  } else {");
+        buffer.addLine("    checkFault(&response)");
+        buffer.addLine("  }");
 
         // End function:
         buffer.addLine("}");
@@ -222,34 +228,34 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", serviceTypeName, actionName, serviceTypeName);
 
         // Generate the function:
-        // TODO: implement
-        buffer.addLine("action = Action.new(opts)");
-        buffer.addLine("writer = XmlWriter.new(nil, true)");
-        buffer.addLine("ActionWriter.write_one(action, writer)");
-        buffer.addLine("body = writer.string");
-        buffer.addLine("writer.close");
-        buffer.addLine("request = Request.new({");
-        buffer.addLine(  ":method => :POST,");
-        buffer.addLine(  ":path => \"#{@path}/%1$s\",", getPath(methodName));
-        buffer.addLine(  ":body => body,");
-        buffer.addLine("})");
-        buffer.addLine("response = @connection.send(request)");
-        buffer.addLine("case response.code");
-        buffer.addLine("when 200");
-        buffer.addLine(  "action = check_action(response)");
+        buffer.addLine("  action := types.NewAction(opts)");
+        buffer.addLine("  writer := ov_xml.NewXmlWriter(nil, true)");
+        // TODO: error handling on writers?
+        buffer.addLine("  writers.ActionWriterWriteOne(action, writer)");
+        buffer.addLine("  body := writer.String()");
+        buffer.addLine("  writer.Close()");
+        buffer.addLine("  request := http.Request{");
+        buffer.addLine("    Method: \"POST\",");
+        buffer.addLine("    Path: fmt.Sprintf(\"%%s/%1$s\", s.path),", getPath(methodName));
+        buffer.addLine("    Body: body,");
+        buffer.addLine("  }");
+        buffer.addLine("  response := s.Connection.send(&request)");
+        buffer.addLine("  if *response.Code == 200 {");
+        buffer.addLine("    action = checkAction(&response)");
         method.parameters()
             .filter(Parameter::isOut)
             .findFirst()
             .ifPresent(this::generateActionResponse);
-        buffer.addLine("else");
-        buffer.addLine(  "check_fault(response)");
-        buffer.addLine("end");
+        buffer.addLine("  } else {");
+        buffer.addLine("    checkFault(&response)");
+        buffer.addLine("  }");
 
         // End function:
         buffer.addLine("}");
         buffer.addLine();
     }
 
+    // TODO: review
     private void generateActionResponse(Parameter parameter) {
         buffer.addLine("return action.%1$s", goNames.getPublicFuncStyleName(parameter.getName()));
     }
