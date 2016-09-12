@@ -19,17 +19,16 @@ package writers
 import (
 	"fmt"
 	"time"
-)
 
-// TODO: do we want to mandate some functions on any type we know implements XmlWriter?
-type XmlWriter interface{}
+	"github.com/CpuID/ovirt-engine-sdk-go/sdk/ov_xml"
+)
 
 //
 // This is the base functions for all the XML writers used by the SDK. It contains the utility methods used by all of them.
 //
 
 // Writes an element with the given name and string value.
-func WriteString(writer *XmlWriter, name string, value string) {
+func WriteString(writer *ov_xml.XmlWriter, name string, value string) {
 	// TODO: implement
 }
 
@@ -39,7 +38,7 @@ func RenderBoolean(value bool) string {
 }
 
 // Writes an element with the given name and boolean value.
-func WriteBoolean(writer *XmlWriter, name string, value string) {
+func WriteBoolean(writer *ov_xml.XmlWriter, name string, value string) {
 	// TODO: implement
 }
 
@@ -49,7 +48,7 @@ func RenderInteger(value int) string {
 }
 
 // Writes an element with the given name and integer value.
-func WriteInteger(writer *XmlWriter, name string, value int) {
+func WriteInteger(writer *ov_xml.XmlWriter, name string, value int) {
 	// TODO: implement
 }
 
@@ -61,7 +60,7 @@ func RenderDecimal(value float64) string {
 
 // Writes an element with the given name and decimal value.
 // TODO: int or float?
-func WriteDecimal(writer *XmlWriter, name string, value float64) {
+func WriteDecimal(writer *ov_xml.XmlWriter, name string, value float64) {
 	// TODO: implement
 }
 
@@ -71,6 +70,6 @@ func RenderDate(value *time.Time) string {
 }
 
 // Writes an element with the given name and date value.
-func WriteDate(writer *XmlWriter, name string, value time.Time) {
+func WriteDate(writer *ov_xml.XmlWriter, name string, value time.Time) {
 	// TODO: implement
 }

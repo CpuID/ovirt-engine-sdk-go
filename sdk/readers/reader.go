@@ -17,41 +17,58 @@
 package readers
 
 import (
+	"fmt"
+	"strings"
 	"time"
-)
 
-// TODO: do we want to mandate some functions on any type we know implements XmlReader?
-type XmlReader interface{}
+	"github.com/CpuID/ovirt-engine-sdk-go/sdk/ov_xml"
+)
 
 //
 // This is the base functions for all the readers of the SDK. It contains the utility methods used by all of them.
 //
 
 // Reads a string value, assuming that the cursor is positioned at the start element that contains the value.
-func ReadString(reader *XmlReader) string {
+func ReadString(reader *ov_xml.XmlReader) string {
 	// TODO: implement
 }
 
 // Reads a list of string values, assuming that the cursor is positioned at the start of the element that contains
 // the first value.
-func ReadStrings(reader *XmlReader) []string {
+func ReadStrings(reader *ov_xml.XmlReader) []string {
 	// TODO: implement
 }
 
 // Converts the given text to a boolean value.
 func ParseBoolean(text *string) bool {
-	// TODO: implement
+	if *text == "" {
+		return nil
+	}
+	use_text := strings.ToLower(*text)
+	if use_text == "false" || use_text == "0" {
+		return false
+	} else if use_text == "true" || use_text == "1" {
+		return true
+	} else {
+		// TODO: error handling, do we make the return type (bool, error)?
+		// The text '#{text}' isn't a valid boolean value.
+	}
 }
 
 // Reads a boolean value, assuming that the cursor is positioned at the start element that contains the value.
-func ReadBoolean(reader *XmlReader) bool {
-	// TODO: implement
+func ReadBoolean(reader *ov_xml.XmlReader) bool {
+	return ParseBoolean(reader.ReadElement())
 }
 
 // Reads a list of boolean values, assuming that the cursor is positioned at the start element that contains
 // the values.
-func ReadBooleans(reader *XmlReader) []bool {
-	// TODO: implement
+func ReadBooleans(reader *ov_xml.XmlReader) []bool {
+	var result []bool
+	// TODO: do we care about the keys...?
+	for _, v := range reader.ReadElements() {
+		result.push(ParseBoolean(v))
+	}
+	return result
 }
 
 // Converts the given text to an integer value.
@@ -60,13 +77,13 @@ func ParseInteger(text *string) int {
 }
 
 // Reads an integer value, assuming that the cursor is positioned at the start element that contains the value.
-func ReadInteger(reader *XmlReader) int {
+func ReadInteger(reader *ov_xml.XmlReader) int {
 	// TODO: implement
 }
 
 // Reads a list of integer values, assuming that the cursor is positioned at the start element that contains the
 // values.
-func ReadIntegers(reader *XmlReader) []int {
+func ReadIntegers(reader *ov_xml.XmlReader) []int {
 	// TODO: implement
 }
 
@@ -78,14 +95,14 @@ func ParseDecimal(text *string) int {
 
 // Reads a decimal value, assuming that the cursor is positioned at the start element that contains the value.
 // TODO: int or float?
-func ReadDecimal(reader *XmlReader) int {
-	// TODO: implement
+func ReadDecimal(reader *ov_xml.XmlReader) int {
+	return ParseDecimal(Reader.ReadElement())
 }
 
 // Reads a list of decimal values, assuming that the cursor is positioned at the start element that contains the
 // values.
 // TODO: int or float?
-func ReadDecimals(reader *XmlReader) []int {
+func ReadDecimals(reader *ov_xml.XmlReader) []int {
 	// TODO: implement
 }
 
@@ -95,12 +112,12 @@ func ParseDate(text *string) time.Time {
 }
 
 // Reads a date value, assuming that the cursor is positioned at the start element that contains the value.
-func ReadDate(reader *XmlReader) time.Time {
+func ReadDate(reader *ov_xml.XmlReader) time.Time {
 	// TODO: implement
 }
 
 // Reads a list of dates values, assuming that the cursor is positioned at the start element that contains the
 // values.
-func ReadDates(reader *XmlReader) []time.Time {
+func ReadDates(reader *ov_xml.XmlReader) []time.Time {
 	// TODO: implement
 }
