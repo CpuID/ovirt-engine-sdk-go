@@ -105,9 +105,11 @@ public class ServicesGenerator implements GoGenerator {
         buffer.setFileName(serviceName.getFileName());
         buffer.setPackageName("services");
 
-        // Set our imports
+        // Set our imports:
         String repoSdkUrl = goNames.repoSdkUrl();
+        buffer.addImport("fmt");
         buffer.addImport(repoSdkUrl + "/http");
+        buffer.addImport(repoSdkUrl + "/ov_xml");
         buffer.addImport(repoSdkUrl + "/readers");
         buffer.addImport(repoSdkUrl + "/types");
         buffer.addImport(repoSdkUrl + "/writers");

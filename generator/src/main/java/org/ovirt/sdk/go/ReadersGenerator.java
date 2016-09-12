@@ -75,7 +75,14 @@ public class ReadersGenerator implements GoGenerator {
         buffer.setFileName(readerName.getFileName());
         buffer.setPackageName("readers");
 
-        // Begin class:
+        // Set our imports:
+        // TODO: setup however required
+        //String repoSdkUrl = goNames.repoSdkUrl();
+        //buffer.addImport("fmt");
+        //buffer.addImport(repoSdkUrl + "/http");
+
+        // Begin struct type:
+        // TODO: review below here
         GoName typeName = goNames.getTypeName(type);
         GoName baseName = goNames.getBaseReaderName();
         buffer.addLine("class %1$s < %2$s # :nodoc:", readerName.getClassName(), baseName.getClassName());

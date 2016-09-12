@@ -73,7 +73,14 @@ public class WritersGenerator implements GoGenerator {
         buffer.setFileName(writerName.getFileName());
         buffer.setPackageName("writers");
 
-        // Begin class:
+        // Set our imports:
+        // TODO: setup however required
+        //String repoSdkUrl = goNames.repoSdkUrl();
+        //buffer.addImport("fmt");
+        //buffer.addImport(repoSdkUrl + "/http");
+
+        // Begin struct type:
+        // TODO: review below here
         GoName baseName = goNames.getBaseWriterName();
         buffer.addLine("class %1$s < %2$s # :nodoc:", writerName.getClassName(), baseName.getClassName());
         buffer.addLine();
