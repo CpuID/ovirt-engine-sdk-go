@@ -55,29 +55,14 @@ public class TypesGenerator implements GoGenerator {
     }
 
     public void generate(Model model) {
-        // Calculate the file name:
-        String fileName = goNames.getPackagePath() + "/types/types";
-        buffer = new GoBuffer();
-        buffer.setFileName(fileName);
-        buffer.setPackageName("types");
-
         // Generate the source:
         generateStructs(model);
         generateEnums(model);
-
-        // Write the file:
-        try {
-            buffer.write(out);
-        }
-        catch (IOException exception) {
-            throw new IllegalStateException("Error writing types file \"" + fileName + "\"", exception);
-        }
     }
 
     private void generateStructs(Model model) {
-        // The declarations of the types need to appear in inheritance order, otherwise some symbols won't be
-        // defined and that will produce errors. To order them correctly we need first to sort them by name, and
-        // then sort again so that bases are before extensions.
+        // We don't care too much about declaration order, but let's use inheritance order (if any), for consistency
+        // with other SDK implementations.
         Deque<StructType> pending = model.types()
             .filter(StructType.class::isInstance)
             .map(StructType.class::cast)
@@ -100,7 +85,20 @@ public class TypesGenerator implements GoGenerator {
     }
 
     private void generateStruct(StructType type) {
-        // Begin strcut type:
+        // Calculate the file name:
+        buffer = new GoBuffer();
+        // TODO: value?
+        //String fileName = goNames.getPackagePath() + "/types/types";
+        //buffer.setFileName(serviceName.getFileName());
+        buffer.setPackageName("types");
+
+        // Set our imports:
+        // TODO: setup however required
+        //String repoSdkUrl = goNames.repoSdkUrl();
+        //buffer.addImport("fmt");
+        //buffer.addImport(repoSdkUrl + "/http");
+
+        // Begin struct type:
         generateTypeDeclaration(type);
         buffer.addLine();
 
@@ -149,6 +147,14 @@ public class TypesGenerator implements GoGenerator {
         // End type:
         buffer.addLine("}");
         buffer.addLine();
+
+        // Write the file:
+        try {
+            buffer.write(out);
+        }
+        catch (IOException exception) {
+            throw new IllegalStateException("Error writing types file \"" + fileName + "\"", exception);
+        }
     }
 
     private void generateMember(StructMember member) {
@@ -223,11 +229,32 @@ public class TypesGenerator implements GoGenerator {
     }
 
     private void generateEnums(Model model) {
+        // One big file of all enums for now.
+        // Calculate the file name:
+        buffer = new GoBuffer();
+        String fileName = goNames.getPackagePath() + "/types/enum";
+        buffer.setFileName(fileName);
+        buffer.setPackageName("types");
+
+        // Set our imports:
+        // TODO: setup however required
+        //String repoSdkUrl = goNames.repoSdkUrl();
+        //buffer.addImport("fmt");
+        //buffer.addImport(repoSdkUrl + "/http");
+
         model.types()
             .filter(EnumType.class::isInstance)
             .map(EnumType.class::cast)
             .sorted()
             .forEach(this::generateEnum);
+
+        // Write the file:
+        try {
+            buffer.write(out);
+        }
+        catch (IOException exception) {
+            throw new IllegalStateException("Error writing types file \"" + fileName + "\"", exception);
+        }
     }
 
     private void generateEnum(EnumType type) {
