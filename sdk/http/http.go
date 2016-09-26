@@ -162,7 +162,7 @@ func (c *Connection) Send(r *Request) (*Response, error) {
 	use_url := c.buildUrl(r.Path, r.Query)
 
 	// Validate the method selected:
-	if slice.stringInSlice(r.Method, []string{"DELETE", "GET", "PUT", "HEAD", "POST"}) == false {
+	if slice.StringInSlice(r.Method, []string{"DELETE", "GET", "PUT", "HEAD", "POST"}) == false {
 		return &result, fmt.Errorf("The HTTP method '%s' is invalid, we expected one of DELETE/GET/PUT/HEAD/POST.", r.Method)
 	}
 
