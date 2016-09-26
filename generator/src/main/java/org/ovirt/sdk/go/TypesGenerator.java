@@ -61,6 +61,18 @@ public class TypesGenerator implements GoGenerator {
     }
 
     private void generateStructs(Model model) {
+        // Calculate the file name:
+        buffer = new GoBuffer();
+        String fileName = goNames.getPackagePath() + "/types/types";
+        buffer.setFileName(fileName);
+        buffer.setPackageName("types");
+
+        // Set our imports:
+        // TODO: setup however required
+        //String repoSdkUrl = goNames.repoSdkUrl();
+        //buffer.addImport("fmt");
+        //buffer.addImport(repoSdkUrl + "/http");
+
         // We don't care too much about declaration order, but let's use inheritance order (if any), for consistency
         // with other SDK implementations.
         Deque<StructType> pending = model.types()
@@ -82,30 +94,33 @@ public class TypesGenerator implements GoGenerator {
 
         // Generate the complete declarations, using the same order:
         sorted.forEach(this::generateStruct);
+
+        // Write the file:
+        try {
+            buffer.write(out);
+        }
+        catch (IOException exception) {
+            throw new IllegalStateException("Error writing types file \"" + fileName + "\"", exception);
+        }
     }
 
     private void generateStruct(StructType type) {
-        // Calculate the file name:
-        buffer = new GoBuffer();
-        // TODO: value?
-        //String fileName = goNames.getPackagePath() + "/types/types";
-        //buffer.setFileName(serviceName.getFileName());
-        buffer.setPackageName("types");
-
-        // Set our imports:
-        // TODO: setup however required
-        //String repoSdkUrl = goNames.repoSdkUrl();
-        //buffer.addImport("fmt");
-        //buffer.addImport(repoSdkUrl + "/http");
-
         // Begin struct type:
         generateTypeDeclaration(type);
-        buffer.addLine();
 
-        // Attributes and links:
+        // Attributes and links, for fields and member functions:
         List<StructMember> members = new ArrayList<>();
         members.addAll(type.getAttributes());
         members.addAll(type.getLinks());
+
+        // Add struct fields:
+        members.stream().sorted().forEach(this::generateStructField);
+
+        // End type:
+        buffer.addLine("}");
+        buffer.addLine();
+
+        // Struct member functions:
         members.stream().sorted().forEach(this::generateMember);
 
         // Constructor with a named parameter for each attribute:
@@ -143,37 +158,33 @@ public class TypesGenerator implements GoGenerator {
         });
         buffer.addLine("end");
         buffer.addLine();
+    }
 
-        // End type:
-        buffer.addLine("}");
-        buffer.addLine();
-
-        // Write the file:
-        try {
-            buffer.write(out);
-        }
-        catch (IOException exception) {
-            throw new IllegalStateException("Error writing types file \"" + fileName + "\"", exception);
-        }
+    private void generateStructField(StructMember member) {
+        Name name = member.getName();
+        Type type = member.getType();
+        // TODO: deal with complexed types, need to translate to structs?
+        buffer.addLine("  %1$s %2$s", goNames.getTypeStyleName(name), type);
     }
 
     private void generateMember(StructMember member) {
-        generateGetter(member);
+        //generateGetter(member);
         generateSetter(member);
     }
 
+    /*
+     * struct fields will all be public, don't need a getter
     private void generateGetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
         String property = goNames.getPublicFuncStyleName(name);
-        buffer.addComment();
         buffer.addComment("Returns the value of the `%1$s` attribute.", property);
-        buffer.addComment();
-        buffer.addLine("def %1$s", property);
+        buffer.addLine("func (g *TODOtype) Get%1$s () {", property);
         buffer.addLine(  "return @%1$s", property);
         buffer.addLine("end");
         buffer.addLine();
     }
+    */
 
     private void generateSetter(StructMember member) {
         Name name = member.getName();
