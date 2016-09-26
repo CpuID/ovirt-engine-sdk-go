@@ -121,71 +121,51 @@ public class TypesGenerator implements GoGenerator {
         buffer.addLine();
 
         // Struct member functions:
-        members.stream().sorted().forEach(this::generateMember);
+        members.stream().sorted().forEach(this::generateSetterMember);
     }
 
     private void generateStructField(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
         // All of these types are local to the types package, no need to prefix with another package name.
-        if (type instanceof ListType) {
-          ListType listType = (ListType) type;
-          Type elementType = listType.getElementType();
-          buffer.addLine("  %1$s []%2$s", goNames.getPublicStyleName(name), goNames.getPublicStyleName(elementType.getName()));
-        } else if (type instanceof PrimitiveType) {
-          buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), convertMetaModelPrimitiveTypeToGoType(type));
+        buffer.addLine("  %1$s []%2$s", goNames.getPublicStyleName(name), convertMetamodelTypeToGoType(type));
+    }
+
+    private String convertMetamodelTypeToGoType (Type type) {
+      if (type instanceof PrimitiveType) {
+        Model model = type.getModel();
+        if (type == model.getBooleanType()) {
+          return "bool";
+        } else if (type == model.getIntegerType()) {
+          return "int";
+        } else if (type == model.getDecimalType()) {
+          return "float64";
+        } else if (type == model.getStringType()) {
+          return "string";
+        } else if (type == model.getDateType()) {
+          return "time.Time";
         } else {
-          buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), goNames.getPublicStyleName(type.getName()));
+          throw new RuntimeException("Variable type " + type + " cannot be converted to a builtin Go type");
         }
-    }
-
-    private String convertMetaModelPrimitiveTypeToGoType (Type type) {
-      if (!(type instanceof PrimitiveType)) {
-        throw new RuntimeException("Variable type " + type + " is not an instance of PrimitiveType");
-      }
-      Model model = type.getModel();
-      if (type == model.getBooleanType()) {
-        return "bool";
-      } else if (type == model.getIntegerType()) {
-        return "int";
-      } else if (type == model.getDecimalType()) {
-        return "float64";
-      } else if (type == model.getStringType()) {
-        return "string";
-      } else if (type == model.getDateType()) {
-        return "time.Time";
+      } else if (type instanceof ListType) {
+        ListType listType = (ListType) type;
+        Type elementType = listType.getElementType();
+        return goNames.getPublicStyleName(elementType.getName());
       } else {
-        throw new RuntimeException("Variable type " + type + " cannot be converted to a builtin Go type");
+        return goNames.getPublicStyleName(type.getName());
       }
     }
 
-    private void generateMember(StructMember member) {
-        //generateGetter(member);
-        generateSetter(member);
-    }
-
-    /*
-     * struct fields will all be public, don't need a getter
-    private void generateGetter(StructMember member) {
+    private void generateSetterMember(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
+        StructType declaringType = member.getDeclaringType();
         String property = goNames.getPublicStyleName(name);
-        buffer.addComment("Returns the value of the `%1$s` attribute.", property);
-        buffer.addLine("func (g *TODOtype) Get%1$s () {", property);
-        buffer.addLine(  "return @%1$s", property);
-        buffer.addLine("end");
-        buffer.addLine();
-    }
-    */
-
-    private void generateSetter(StructMember member) {
-        Name name = member.getName();
-        Type type = member.getType();
-        String property = goNames.getPublicStyleName(name);
+        String propertyType = convertMetamodelTypeToGoType(type);
         if (!(type instanceof PrimitiveType)) {
           buffer.addComment("Sets the value of the `%1$s` attribute.", property);
           if (type instanceof EnumType) {
-              buffer.addLine("func (s *%1$s) Set%2$s (value %3$s) error {", property, "TODO1", "TODO2");
+              buffer.addLine("func (s *%1$s) Set%2$s (value %3$s) error {", goNames.getPublicStyleName(declaringType.getName()), property, propertyType);
               buffer.addLine("  s.%1$s = value", property);
               buffer.addLine("  return s.%1$s.Validate()", "TODO1");
               buffer.addLine("}");
