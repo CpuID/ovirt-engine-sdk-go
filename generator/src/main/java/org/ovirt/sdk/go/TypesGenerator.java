@@ -128,9 +128,35 @@ public class TypesGenerator implements GoGenerator {
         Name name = member.getName();
         Type type = member.getType();
         // All of these types are local to the types package, no need to prefix with another package name.
-        // TODO: goNames.getPublicStyleName(type), need to cast Type though...
-        // [ERROR] TypesGenerator.java:[131,99] error: incompatible types: Type cannot be converted to Name
-        buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), type);
+        if (type instanceof ListType) {
+          ListType listType = (ListType) type;
+          Type elementType = listType.getElementType();
+          buffer.addLine("  %1$s []%2$s", goNames.getPublicStyleName(name), goNames.getPublicStyleName(elementType.getName()));
+        } else if (type instanceof PrimitiveType) {
+          buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), convertMetaModelPrimitiveTypeToGoType(type));
+        } else {
+          buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), goNames.getPublicStyleName(type.getName()));
+        }
+    }
+
+    private String convertMetaModelPrimitiveTypeToGoType (Type type) {
+      if (!(type instanceof PrimitiveType)) {
+        throw new RuntimeException("Variable type " + type + " is not an instance of PrimitiveType");
+      }
+      Model model = type.getModel();
+      if (type == model.getBooleanType()) {
+        return "bool";
+      } else if (type == model.getIntegerType()) {
+        return "int";
+      } else if (type == model.getDecimalType()) {
+        return "float64";
+      } else if (type == model.getStringType()) {
+        return "string";
+      } else if (type == model.getDateType()) {
+        return "time.Time";
+      } else {
+        throw new RuntimeException("Variable type " + type + " cannot be converted to a builtin Go type");
+      }
     }
 
     private void generateMember(StructMember member) {
