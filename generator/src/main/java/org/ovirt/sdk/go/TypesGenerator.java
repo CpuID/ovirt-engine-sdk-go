@@ -122,52 +122,15 @@ public class TypesGenerator implements GoGenerator {
 
         // Struct member functions:
         members.stream().sorted().forEach(this::generateMember);
-
-        // No constructor required, literals can be defined instead as required.
-        // Constructor with a named parameter for each attribute:
-        /*
-        GoName typeName = goNames.getTypeName(type);
-        buffer.addComment();
-        buffer.addComment("Creates a new instance of the {%1$s} class.", typeName.getClassName());
-        buffer.addComment();
-        buffer.addComment("@param opts [Hash] A hash containing the attributes of the object. The keys of the hash ");
-        buffer.addComment("  should be symbols corresponding to the names of the attributes. The values of the hash ");
-        buffer.addComment("  should be the values of the attributes.");
-        buffer.addComment();
-        members.stream().sorted().forEach(member -> {
-            Type memberType = member.getType();
-            Name memberName = member.getName();
-            String docName = goNames.getPublicFuncStyleName(memberName);
-            if (memberType instanceof PrimitiveType || memberType instanceof EnumType) {
-                buffer.addComment("@option opts :%1$s The value of attribute `%1$s`.", docName);
-                buffer.addComment();
-            }
-            else if (memberType instanceof StructType) {
-                buffer.addComment("@option opts [Hash] :%1$s The value of attribute `%1$s`.", docName);
-                buffer.addComment();
-            }
-            else if (memberType instanceof ListType) {
-                buffer.addComment("@option opts [Array<Hash>] :%1$s The values of attribute `%1$s`.", docName);
-                buffer.addComment();
-            }
-        });
-        buffer.addComment();
-        buffer.addLine("def initialize(opts = {})");
-        buffer.addLine(  "super(opts)");
-        members.stream().sorted().forEach(member -> {
-            String memberName = goNames.getPublicFuncStyleName(member.getName());
-            buffer.addLine("self.%1$s = opts[:%1$s]", memberName);
-        });
-        buffer.addLine("end");
-        buffer.addLine();
-        */
     }
 
     private void generateStructField(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        // TODO: deal with complexed types, need to translate to structs?
-        buffer.addLine("  %1$s %2$s", goNames.getTypeStyleName(name), type);
+        // All of these types are local to the types package, no need to prefix with another package name.
+        // TODO: goNames.getPublicStyleName(type), need to cast Type though...
+        // [ERROR] TypesGenerator.java:[131,99] error: incompatible types: Type cannot be converted to Name
+        buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), type);
     }
 
     private void generateMember(StructMember member) {
@@ -180,7 +143,7 @@ public class TypesGenerator implements GoGenerator {
     private void generateGetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getPublicFuncStyleName(name);
+        String property = goNames.getPublicStyleName(name);
         buffer.addComment("Returns the value of the `%1$s` attribute.", property);
         buffer.addLine("func (g *TODOtype) Get%1$s () {", property);
         buffer.addLine(  "return @%1$s", property);
@@ -192,7 +155,7 @@ public class TypesGenerator implements GoGenerator {
     private void generateSetter(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
-        String property = goNames.getPublicFuncStyleName(name);
+        String property = goNames.getPublicStyleName(name);
         if (!(type instanceof PrimitiveType)) {
           buffer.addComment("Sets the value of the `%1$s` attribute.", property);
           if (type instanceof EnumType) {
@@ -291,8 +254,7 @@ public class TypesGenerator implements GoGenerator {
     }
 
     private void generateEnumValue(EnumValue value) {
-        String constantName = goNames.getConstantStyleName(value.getName());
-        buffer.addLine("    \"%1$s\",", constantName);
+        buffer.addLine("    \"%1$s\",", goNames.getPublicStyleName(value.getName()));
     }
 
     private void generateTypeDeclaration(StructType type) {

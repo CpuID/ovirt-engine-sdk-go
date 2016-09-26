@@ -179,8 +179,8 @@ public class ServicesGenerator implements GoGenerator {
         Type parameterType = parameter.getType();
         Name parameterName = parameter.getName();
         // TODO: review, parameterName vs methodName?
-        String arg = goNames.getPublicFuncStyleName(parameterName);
-        String actionName = goNames.getPublicFuncStyleName(methodName);
+        String arg = goNames.getPublicStyleName(parameterName);
+        String actionName = goNames.getPublicStyleName(methodName);
         String serviceTypeName = getTypeDeclaration(method.getDeclaringService());
         String doc = method.getDoc();
         if (doc == null) {
@@ -219,7 +219,7 @@ public class ServicesGenerator implements GoGenerator {
     private void generateActionHttpPost(Method method) {
         // Begin method:
         Name methodName = method.getName();
-        String actionName = goNames.getPublicFuncStyleName(methodName);
+        String actionName = goNames.getPublicStyleName(methodName);
         String serviceTypeName = getTypeDeclaration(method.getDeclaringService());
         String doc = method.getDoc();
         if (doc == null) {
@@ -259,7 +259,7 @@ public class ServicesGenerator implements GoGenerator {
 
     // TODO: review
     private void generateActionResponse(Parameter parameter) {
-        buffer.addLine("return action.%1$s", goNames.getPublicFuncStyleName(parameter.getName()));
+        buffer.addLine("return action.%1$s", goNames.getPublicStyleName(parameter.getName()));
     }
 
     private void generateHttpGet(Method method) {
@@ -287,7 +287,7 @@ public class ServicesGenerator implements GoGenerator {
         Name methodName = method.getName();
         String serviceTypeName = getTypeDeclaration(method.getDeclaringService());
         // TODO: %3 should not be serviceTypeName, it should be the parameter type. verify the format of parameterType (translate?), needs to be types.Type
-        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", serviceTypeName, goNames.getPublicFuncStyleName(methodName), serviceTypeName);
+        buffer.addLine("func (s *%1$s) %2$s(opts map[string]string) *%3$s {", serviceTypeName, goNames.getPublicStyleName(methodName), serviceTypeName);
 
         // Generate the input parameters:
         buffer.addLine("  query := make(map[string]string)");
@@ -326,7 +326,7 @@ public class ServicesGenerator implements GoGenerator {
         Name methodName = method.getName();
         Name parameterName = parameter.getName();
         Type parameterType = parameter.getType();
-        String arg = goNames.getPublicFuncStyleName(parameterName);
+        String arg = goNames.getPublicStyleName(parameterName);
         String doc = method.getDoc();
         if (doc == null) {
             doc = "Updates the object managed by this service.";
@@ -334,7 +334,7 @@ public class ServicesGenerator implements GoGenerator {
         buffer.addComment(doc);
         // TODO: fix function args, needs to be named (is i sufficient? or use something more elegant?). it also needs to come from types.arg
         // TODO: add some return type, bool or error most likely
-        buffer.addLine("func (s *%1$s) %2$s(i %3$s)", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(methodName), arg);
+        buffer.addLine("func (s *%1$s) %2$s(i %3$s)", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicStyleName(methodName), arg);
 
         // Body:
         generateConvertLiteral(parameterType, arg);
@@ -435,7 +435,7 @@ public class ServicesGenerator implements GoGenerator {
             doc = "Deletes the object managed by this service. If Async = true, error will always be nil.";
         }
         buffer.addComment(doc);
-        buffer.addLine("func (s *%1$s) %2$s(opts RemoveOpts) error {", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicFuncStyleName(name));
+        buffer.addLine("func (s *%1$s) %2$s(opts RemoveOpts) error {", getTypeDeclaration(method.getDeclaringService()), goNames.getPublicStyleName(name));
 
         // Generate the input parameters:
         buffer.addLine("  query := make(map[string]string)");
@@ -463,7 +463,7 @@ public class ServicesGenerator implements GoGenerator {
         Type type = parameter.getType();
         Name name = parameter.getName();
         // TODO: use a nicer function than this...?
-        String symbol = goNames.getPublicFuncStyleName(name);
+        String symbol = goNames.getPublicStyleName(name);
         String tag = schemaNames.getSchemaTagName(name);
         // TODO: is this suitable for all input types...? or we need to compare against != "" sometimes? or len(opts.%1$s) != 0?
         buffer.addLine("  if opts.%1$s != nil {", symbol);
@@ -507,8 +507,8 @@ public class ServicesGenerator implements GoGenerator {
 
     private void generateLocatorWithParameters(Locator locator) {
         Parameter parameter = locator.parameters().findFirst().get();
-        String methodName = goNames.getPublicFuncStyleName(locator.getName());
-        String argName = goNames.getPublicFuncStyleName(parameter.getName());
+        String methodName = goNames.getPublicStyleName(locator.getName());
+        String argName = goNames.getPublicStyleName(parameter.getName());
         GoName serviceName = goNames.getServiceName(locator.getService());
 
         String doc = locator.getDoc();
@@ -526,7 +526,7 @@ public class ServicesGenerator implements GoGenerator {
     }
 
     private void generateLocatorWithoutParameters(Locator locator) {
-        String methodName = goNames.getPublicFuncStyleName(locator.getName());
+        String methodName = goNames.getPublicStyleName(locator.getName());
         String urlSegment = getPath(locator.getName());
         GoName serviceName = goNames.getServiceName(locator.getService());
         String doc = locator.getDoc();
@@ -558,12 +558,12 @@ public class ServicesGenerator implements GoGenerator {
             Name name = locator.getName();
             String segment = getPath(name);
             buffer.addLine("if path == '%1$s'", segment);
-            buffer.addLine(  "return %1$s_service", goNames.getPublicFuncStyleName(name));
+            buffer.addLine(  "return %1$s_service", goNames.getPublicStyleName(name));
             buffer.addLine("end");
             buffer.addLine("if path.start_with?('%1$s/')", segment);
             buffer.addLine(
                 "return %1$s_service.service(path[%2$d..-1])",
-                goNames.getPublicFuncStyleName(name),
+                goNames.getPublicStyleName(name),
                 segment.length() + 1
             );
             buffer.addLine("end");
@@ -578,11 +578,11 @@ public class ServicesGenerator implements GoGenerator {
             Name name = locator.getName();
             buffer.addLine("index = path.index('/')");
             buffer.addLine("if index.nil?");
-            buffer.addLine(  "return %1$s_service(path)", goNames.getPublicFuncStyleName(name));
+            buffer.addLine(  "return %1$s_service(path)", goNames.getPublicStyleName(name));
             buffer.addLine("end");
             buffer.addLine(
                 "return %1$s_service(path[0..(index - 1)]).service(path[(index +1)..-1])",
-                goNames.getPublicFuncStyleName(name)
+                goNames.getPublicStyleName(name)
             );
         }
         else {

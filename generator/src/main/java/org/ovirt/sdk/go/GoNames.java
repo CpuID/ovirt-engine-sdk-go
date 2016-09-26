@@ -206,7 +206,7 @@ public class GoNames {
         }
         Name name = new Name(words);
         GoName result = new GoName();
-        result.setClassName(getTypeStyleName(name));
+        result.setClassName(getPublicStyleName(name));
 
         // Calculate the file name:
         StringBuilder fileName = new StringBuilder();
@@ -223,32 +223,18 @@ public class GoNames {
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Go types.
+     * Returns a representation of the given name using the capitalization style typically used for Go public/exported types/functions.
      */
-    public String getTypeStyleName(Name name) {
+    public String getPublicStyleName(Name name) {
         return name.words().map(words::capitalize).collect(joining());
     }
 
     /**
-     * Returns a representation of the given name using the capitalization style typically used for Go private functions.
+     * Returns a representation of the given name using the capitalization style typically used for Go private/non-exported types/functions.
      */
-    public String getPrivateFuncStyleName(Name name) {
+    public String getPrivateStyleName(Name name) {
         String capitalized = name.words().map(words::capitalize).collect(joining());
         return Character.toLowerCase(capitalized.charAt(0)) + capitalized.substring(1);
-    }
-
-    /**
-     * Returns a representation of the given name using the capitalization style typically used for Go public functions.
-     */
-    public String getPublicFuncStyleName(Name name) {
-        return name.words().map(words::capitalize).collect(joining());
-    }
-
-    /**
-     * Returns a representation of the given name using the capitalization style typically used for Go constants.
-     */
-    public String getConstantStyleName(Name name) {
-        return name.words().map(words::capitalize).collect(joining());
     }
 
     /**
