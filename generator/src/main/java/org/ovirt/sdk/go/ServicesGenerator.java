@@ -117,8 +117,8 @@ public class ServicesGenerator implements GoGenerator {
 
         // Begin struct type:
         generateTypeDeclaration(service);
-        buffer.addLine("	connection *ovirt_http.Connection");
-        buffer.addLine("	path string");
+        buffer.addLine("  connection *ovirt_http.Connection");
+        buffer.addLine("  path string");
         buffer.addLine("}");
         buffer.addLine();
 

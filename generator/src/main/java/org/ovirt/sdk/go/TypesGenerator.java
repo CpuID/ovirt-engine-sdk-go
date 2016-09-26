@@ -237,20 +237,20 @@ public class TypesGenerator implements GoGenerator {
 
     private void generateEnum(EnumType type) {
         GoName typeName = goNames.getTypeName(type);
-				buffer.addComment("Enum for %1$s", typeName);
+        buffer.addComment("Enum for %1$s", typeName);
         buffer.addLine("type %1$s string", typeName);
-				buffer.addLine();
-				buffer.addLine("func (e *%1$s) Validate () error {", typeName);
+        buffer.addLine();
+        buffer.addLine("func (e *%1$s) Validate () error {", typeName);
         buffer.addLine("  allowed_values := []string{");
         type.values().sorted().forEach(this::generateEnumValue);
         buffer.addLine("  }");
         buffer.addLine("  if slice.StringInSlice(e, allowed_values) != true {");
         buffer.addLine("    return fmt.Errorf(\"Type '%1$s' cannot have a value of '%%s'. Permitted values: %%s\", e, strings.Join(allowed_values, \",\"))", typeName);
-				buffer.addLine("  } else {");
-				buffer.addLine("    return nil");
-				buffer.addLine("  }");
+        buffer.addLine("  } else {");
+        buffer.addLine("    return nil");
+        buffer.addLine("  }");
         buffer.addLine("}");
-				buffer.addLine();
+        buffer.addLine();
     }
 
     private void generateEnumValue(EnumValue value) {
