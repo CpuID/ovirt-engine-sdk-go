@@ -248,13 +248,10 @@ public class TypesGenerator implements GoGenerator {
         buffer.setPackageName("types");
 
         // Set our imports:
-        // TODO: setup however required
-        //String repoSdkUrl = goNames.repoSdkUrl();
-        //buffer.addImport("fmt");
-        //buffer.addImport(repoSdkUrl + "/http");
+        String repoSdkUrl = goNames.repoSdkUrl();
         buffer.addImport("fmt");
         buffer.addImport("strings");
-        buffer.addImport("github.com/CpuID/ovirt-engine-sdk-go/sdk/slice");
+        buffer.addImport(repoSdkUrl + "/slice");
 
         model.types()
             .filter(EnumType.class::isInstance)
@@ -296,7 +293,7 @@ public class TypesGenerator implements GoGenerator {
 
     private void generateTypeDeclaration(StructType type) {
         GoName typeName = goNames.getTypeName(type);
-        buffer.addLine("type %1$s struct{", typeName.getClassName());
+        buffer.addLine("type %1$s struct {", typeName.getClassName());
     }
 }
 
