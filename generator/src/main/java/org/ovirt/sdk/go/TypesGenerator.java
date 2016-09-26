@@ -123,7 +123,9 @@ public class TypesGenerator implements GoGenerator {
         // Struct member functions:
         members.stream().sorted().forEach(this::generateMember);
 
+        // No constructor required, literals can be defined instead as required.
         // Constructor with a named parameter for each attribute:
+        /*
         GoName typeName = goNames.getTypeName(type);
         buffer.addComment();
         buffer.addComment("Creates a new instance of the {%1$s} class.", typeName.getClassName());
@@ -158,6 +160,7 @@ public class TypesGenerator implements GoGenerator {
         });
         buffer.addLine("end");
         buffer.addLine();
+        */
     }
 
     private void generateStructField(StructMember member) {
@@ -190,53 +193,54 @@ public class TypesGenerator implements GoGenerator {
         Name name = member.getName();
         Type type = member.getType();
         String property = goNames.getPublicFuncStyleName(name);
-        buffer.addComment();
-        buffer.addComment("Sets the value of the `%1$s` attribute.", property);
-        buffer.addComment();
-        if (type instanceof PrimitiveType || type instanceof EnumType) {
-            buffer.addLine("def %1$s=(value)", property);
-            buffer.addLine(  "@%1$s = value", property);
-            buffer.addLine("end");
+        if (!(type instanceof PrimitiveType)) {
+          buffer.addComment("Sets the value of the `%1$s` attribute.", property);
+          if (type instanceof EnumType) {
+              buffer.addLine("func (s *%1$s) Set%2$s (value %3$s) error {", property, "TODO1", "TODO2");
+              buffer.addLine("  s.%1$s = value", property);
+              buffer.addLine("  return s.%1$s.Validate()", "TODO1");
+              buffer.addLine("}");
+          }
+          else if (type instanceof StructType) {
+              GoName typeName = goNames.getTypeName(type);
+              buffer.addComment("@param value [Hash]");
+              buffer.addComment();
+              buffer.addComment("The `value` parameter can be an instance of {%1$s} or a hash.", typeName);
+              buffer.addComment("If it is a hash then a new instance will be created passing the hash as the ");
+              buffer.addComment("`opts` parameter to the constructor.");
+              buffer.addComment();
+              buffer.addLine("def %1$s=(value)", property);
+              buffer.addLine(  "if value.is_a?(Hash)");
+              buffer.addLine(    "value = %1$s.new(value)", typeName.getClassName());
+              buffer.addLine(  "end");
+              buffer.addLine(  "@%1$s = value", property);
+              buffer.addLine("end");
+          }
+          else if (type instanceof ListType) {
+              ListType listType = (ListType) type;
+              Type elementType = listType.getElementType();
+              if (elementType instanceof PrimitiveType || elementType instanceof EnumType) {
+                  buffer.addLine("def %1$s=(list)", property);
+                  buffer.addLine(  "@%1$s = list", property);
+                  buffer.addLine("end");
+              }
+              else if (elementType instanceof StructType) {
+                  GoName elementTypeName = goNames.getTypeName(elementType);
+                  buffer.addLine("def %1$s=(list)", property);
+                  buffer.addLine(  "if list.class == Array");
+                  buffer.addLine(    "list = List.new(list)");
+                  buffer.addLine(    "list.each_with_index do |value, index|");
+                  buffer.addLine(      "if value.is_a?(Hash)");
+                  buffer.addLine(        "list[index] = %1$s.new(value)", elementTypeName.getClassName());
+                  buffer.addLine(      "end");
+                  buffer.addLine(    "end");
+                  buffer.addLine(  "end");
+                  buffer.addLine(  "@%1$s = list", property);
+                  buffer.addLine("end");
+              }
+          }
+          buffer.addLine();
         }
-        else if (type instanceof StructType) {
-            GoName typeName = goNames.getTypeName(type);
-            buffer.addComment("@param value [Hash]");
-            buffer.addComment();
-            buffer.addComment("The `value` parameter can be an instance of {%1$s} or a hash.", typeName);
-            buffer.addComment("If it is a hash then a new instance will be created passing the hash as the ");
-            buffer.addComment("`opts` parameter to the constructor.");
-            buffer.addComment();
-            buffer.addLine("def %1$s=(value)", property);
-            buffer.addLine(  "if value.is_a?(Hash)");
-            buffer.addLine(    "value = %1$s.new(value)", typeName.getClassName());
-            buffer.addLine(  "end");
-            buffer.addLine(  "@%1$s = value", property);
-            buffer.addLine("end");
-        }
-        else if (type instanceof ListType) {
-            ListType listType = (ListType) type;
-            Type elementType = listType.getElementType();
-            if (elementType instanceof PrimitiveType || elementType instanceof EnumType) {
-                buffer.addLine("def %1$s=(list)", property);
-                buffer.addLine(  "@%1$s = list", property);
-                buffer.addLine("end");
-            }
-            else if (elementType instanceof StructType) {
-                GoName elementTypeName = goNames.getTypeName(elementType);
-                buffer.addLine("def %1$s=(list)", property);
-                buffer.addLine(  "if list.class == Array");
-                buffer.addLine(    "list = List.new(list)");
-                buffer.addLine(    "list.each_with_index do |value, index|");
-                buffer.addLine(      "if value.is_a?(Hash)");
-                buffer.addLine(        "list[index] = %1$s.new(value)", elementTypeName.getClassName());
-                buffer.addLine(      "end");
-                buffer.addLine(    "end");
-                buffer.addLine(  "end");
-                buffer.addLine(  "@%1$s = list", property);
-                buffer.addLine("end");
-            }
-        }
-        buffer.addLine();
     }
 
     private void generateEnums(Model model) {
