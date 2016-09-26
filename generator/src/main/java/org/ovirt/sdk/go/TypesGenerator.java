@@ -121,14 +121,14 @@ public class TypesGenerator implements GoGenerator {
         buffer.addLine();
 
         // Struct member functions:
-        members.stream().sorted().forEach(this::generateSetterMember);
+        members.stream().sorted().forEach(member -> generateSetterMember(member, type));
     }
 
     private void generateStructField(StructMember member) {
         Name name = member.getName();
         Type type = member.getType();
         // All of these types are local to the types package, no need to prefix with another package name.
-        buffer.addLine("  %1$s []%2$s", goNames.getPublicStyleName(name), convertMetamodelTypeToGoType(type));
+        buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), convertMetamodelTypeToGoType(type));
     }
 
     private String convertMetamodelTypeToGoType (Type type) {
@@ -150,42 +150,46 @@ public class TypesGenerator implements GoGenerator {
       } else if (type instanceof ListType) {
         ListType listType = (ListType) type;
         Type elementType = listType.getElementType();
-        return goNames.getPublicStyleName(elementType.getName());
+        return "[]" + goNames.getPublicStyleName(elementType.getName());
       } else {
         return goNames.getPublicStyleName(type.getName());
       }
     }
 
-    private void generateSetterMember(StructMember member) {
+    private void generateSetterMember(StructMember member, Type parentType) {
         Name name = member.getName();
         Type type = member.getType();
-        StructType declaringType = member.getDeclaringType();
         String property = goNames.getPublicStyleName(name);
-        String propertyType = convertMetamodelTypeToGoType(type);
         if (!(type instanceof PrimitiveType)) {
-          buffer.addComment("Sets the value of the `%1$s` attribute.", property);
+          String propertyType = convertMetamodelTypeToGoType(type);
           if (type instanceof EnumType) {
-              buffer.addLine("func (s *%1$s) Set%2$s (value %3$s) error {", goNames.getPublicStyleName(declaringType.getName()), property, propertyType);
+              buffer.addComment("Sets the value of the `%1$s` attribute.", property);
+              buffer.addLine("func (s *%1$s) Set%2$s (value %3$s) error {", goNames.getPublicStyleName(parentType.getName()), property, propertyType);
               buffer.addLine("  s.%1$s = value", property);
-              buffer.addLine("  return s.%1$s.Validate()", "TODO1");
+              buffer.addLine("  return s.%1$s.Validate()", property);
               buffer.addLine("}");
-          }
-          else if (type instanceof StructType) {
-              GoName typeName = goNames.getTypeName(type);
-              buffer.addComment("@param value [Hash]");
-              buffer.addComment();
-              buffer.addComment("The `value` parameter can be an instance of {%1$s} or a hash.", typeName);
-              buffer.addComment("If it is a hash then a new instance will be created passing the hash as the ");
-              buffer.addComment("`opts` parameter to the constructor.");
-              buffer.addComment();
-              buffer.addLine("def %1$s=(value)", property);
-              buffer.addLine(  "if value.is_a?(Hash)");
-              buffer.addLine(    "value = %1$s.new(value)", typeName.getClassName());
-              buffer.addLine(  "end");
-              buffer.addLine(  "@%1$s = value", property);
-              buffer.addLine("end");
-          }
-          else if (type instanceof ListType) {
+          } else if (type instanceof StructType) {
+              buffer.addComment("To set the value of the `%1$s` attribute, just set the exported field directly.", property);
+              buffer.addComment("As Golang is statically typed, you cannot use a hash/map input to set the field (other SDK languages do).");
+              buffer.addComment("This can be implemented if required (some of the codegen is stubbed out), but incomplete currently.");
+              //buffer.addLine("func (s *%1$s) Set%2$s (value %3$s) {", goNames.getPublicStyleName(declaringType.getName()), property, propertyType);
+              //buffer.addLine("  s.%1$s = value", property);
+              //buffer.addLine("}");
+              // TODOLATER: finish this if it becomes required. try use the typed setter above wherever we can, avoids the need for reflection.
+              /*
+              buffer.addLine();
+              buffer.addComment("For completeness, provide a map input mechanism function equivalent to `Set%1$s` above.", property);
+              buffer.addLine("func (s *%1$s) Set%2$sWithMap (value map[string]string) {", goNames.getPublicStyleName(declaringType.getName()), property);
+              buffer.addLine("  value := %1$s{}", propertyType);
+              buffer.addLine("  for k, v := range value {");
+              // TODOLATER: finish logic using reflect to convert map to struct field values
+              buffer.addLine("  }");
+              buffer.addLine("  s.%1$s = value", property);
+              buffer.addLine("}");
+              */
+          } else if (type instanceof ListType) {
+              buffer.addComment("To set the value of the `%1$s` attribute, just set the exported field directly using a slice literal.", property);
+              /*
               ListType listType = (ListType) type;
               Type elementType = listType.getElementType();
               if (elementType instanceof PrimitiveType || elementType instanceof EnumType) {
@@ -207,6 +211,7 @@ public class TypesGenerator implements GoGenerator {
                   buffer.addLine(  "@%1$s = list", property);
                   buffer.addLine("end");
               }
+              */
           }
           buffer.addLine();
         }
