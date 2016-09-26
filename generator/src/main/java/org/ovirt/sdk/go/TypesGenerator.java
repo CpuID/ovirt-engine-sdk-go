@@ -252,6 +252,9 @@ public class TypesGenerator implements GoGenerator {
         //String repoSdkUrl = goNames.repoSdkUrl();
         //buffer.addImport("fmt");
         //buffer.addImport(repoSdkUrl + "/http");
+        buffer.addImport("fmt");
+        buffer.addImport("strings");
+        buffer.addImport("github.com/CpuID/ovirt-engine-sdk-go/sdk/slice");
 
         model.types()
             .filter(EnumType.class::isInstance)
@@ -269,14 +272,26 @@ public class TypesGenerator implements GoGenerator {
     }
 
     private void generateEnum(EnumType type) {
-        // Values:
+        GoName typeName = goNames.getTypeName(type);
+				buffer.addComment("Enum for %1$s", typeName);
+        buffer.addLine("type %1$s string", typeName);
+				buffer.addLine();
+				buffer.addLine("func (e *%1$s) Validate () error {", typeName);
+        buffer.addLine("  allowed_values := []string{");
         type.values().sorted().forEach(this::generateEnumValue);
+        buffer.addLine("  }");
+        buffer.addLine("  if slice.StringInSlice(e, allowed_values) != true {");
+        buffer.addLine("    return fmt.Errorf(\"Type '%1$s' cannot have a value of '%%s'. Permitted values: %%s\", e, strings.Join(allowed_values, \",\"))", typeName);
+				buffer.addLine("  } else {");
+				buffer.addLine("    return nil");
+				buffer.addLine("  }");
+        buffer.addLine("}");
+				buffer.addLine();
     }
 
     private void generateEnumValue(EnumValue value) {
         String constantName = goNames.getConstantStyleName(value.getName());
-        String constantValue = goNames.getPublicFuncStyleName(value.getName());
-        buffer.addLine("%s = '%s'.freeze", constantName, constantValue);
+        buffer.addLine("    \"%1$s\",", constantName);
     }
 
     private void generateTypeDeclaration(StructType type) {

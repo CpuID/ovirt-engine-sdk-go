@@ -248,8 +248,7 @@ public class GoNames {
      * Returns a representation of the given name using the capitalization style typically used for Go constants.
      */
     public String getConstantStyleName(Name name) {
-        // TODO: review
-        return name.words().map(String::toUpperCase).collect(joining("_"));
+        return name.words().map(words::capitalize).collect(joining());
     }
 
     /**
