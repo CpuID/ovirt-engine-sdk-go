@@ -68,10 +68,7 @@ public class TypesGenerator implements GoGenerator {
         buffer.setPackageName("types");
 
         // Set our imports:
-        // TODO: setup however required
-        //String repoSdkUrl = goNames.repoSdkUrl();
-        //buffer.addImport("fmt");
-        //buffer.addImport(repoSdkUrl + "/http");
+        buffer.addImport("time");
 
         // We don't care too much about declaration order, but let's use inheritance order (if any), for consistency
         // with other SDK implementations.
@@ -128,10 +125,10 @@ public class TypesGenerator implements GoGenerator {
         Name name = member.getName();
         Type type = member.getType();
         // All of these types are local to the types package, no need to prefix with another package name.
-        buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), convertMetamodelTypeToGoType(type));
+        buffer.addLine("  %1$s %2$s", goNames.getPublicStyleName(name), convertMetamodelTypeToGoType(type, member.getDeclaringType()));
     }
 
-    private String convertMetamodelTypeToGoType (Type type) {
+    private String convertMetamodelTypeToGoType (Type type, Type parentType) {
       if (type instanceof PrimitiveType) {
         Model model = type.getModel();
         if (type == model.getBooleanType()) {
@@ -150,9 +147,12 @@ public class TypesGenerator implements GoGenerator {
       } else if (type instanceof ListType) {
         ListType listType = (ListType) type;
         Type elementType = listType.getElementType();
-        return "[]" + goNames.getPublicStyleName(elementType.getName());
+        return "[]" + convertMetamodelTypeToGoType(elementType, parentType);
+      //} else if (type == parentType) {
+      //  return "*" + goNames.getPublicStyleName(type.getName());
       } else {
-        return goNames.getPublicStyleName(type.getName());
+        //return goNames.getPublicStyleName(type.getName());
+        return "*" + goNames.getPublicStyleName(type.getName());
       }
     }
 
@@ -161,7 +161,7 @@ public class TypesGenerator implements GoGenerator {
         Type type = member.getType();
         String property = goNames.getPublicStyleName(name);
         if (!(type instanceof PrimitiveType)) {
-          String propertyType = convertMetamodelTypeToGoType(type);
+          String propertyType = convertMetamodelTypeToGoType(type, parentType);
           if (type instanceof EnumType) {
               buffer.addComment("Sets the value of the `%1$s` attribute.", property);
               buffer.addLine("func (s *%1$s) Set%2$s (value %3$s) error {", goNames.getPublicStyleName(parentType.getName()), property, propertyType);
@@ -255,7 +255,7 @@ public class TypesGenerator implements GoGenerator {
         buffer.addLine("  allowed_values := []string{");
         type.values().sorted().forEach(this::generateEnumValue);
         buffer.addLine("  }");
-        buffer.addLine("  if slice.StringInSlice(e, allowed_values) != true {");
+        buffer.addLine("  if slice.StringInSlice(string(*e), allowed_values) != true {");
         buffer.addLine("    return fmt.Errorf(\"Type '%1$s' cannot have a value of '%%s'. Permitted values: %%s\", e, strings.Join(allowed_values, \",\"))", typeName);
         buffer.addLine("  } else {");
         buffer.addLine("    return nil");
